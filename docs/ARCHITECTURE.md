@@ -1,87 +1,70 @@
 # Architecture and Technical Design
 
-## Status
+## Selected architecture
 
-No application architecture or technology stack has been verified because the repository began empty. This document defines the process and the architecture artifacts to create after challenge discovery; it does not assert that a specific framework or deployment model has been selected.
+A modular spatio-temporal pipeline produces versioned analytical artifacts; a separate web application presents them. Kaggle is the isolated batch compute environment, not the public app host.
 
-## 1. Design goals
+```mermaid
+flowchart TD
+  A[FIRMS MODIS and VIIRS records] --> B[Inventory and five-pass validation]
+  B --> C[AOI filtering and daily aggregation]
+  C --> D[Overlap-period sensor matching]
+  D --> E[Tweedie gradient-boosted harmonizer]
+  C --> F[Daily regional sequence]
+  E --> G[Harmonized daily series]
+  G --> H[Seasonal baseline and PatchTST candidate]
+  H --> I[Calendar, anomaly scores, 14-day forecast]
+  I --> J[Versioned artifacts and manifest]
+  K[HLS optical tiles and local Prithvi weights] --> L[Optional burn-scar audit]
+  J --> M[Separate web application]
+  L --> M
+  M --> N[AOI map, calendar, trends, anomaly details, forecast]
+```
 
-- Direct traceability from challenge requirements to implementation and demo evidence.
-- A small, comprehensible end-to-end path before optional complexity.
-- Explicit boundaries between presentation, domain logic, data access, and external services where those boundaries are useful.
-- Deterministic and testable core behavior.
-- Traceable data provenance and reproducible transformations.
-- Graceful handling of missing, invalid, stale, or unavailable data.
-- Secure configuration and minimal permissions.
-- Observable behavior through useful logs, metrics, and diagnostic messages.
+## Pillar 1 — sensor harmonization
 
-## 2. Architecture decision process
+Use processed FIRMS records and only fields actually available in the selected products. Candidate covariates include MODIS FRP, brightness temperature where available, scan/view geometry where available, local detection density, land cover, elevation, and temporal context.
 
-For every consequential technical choice, record the context, constraints, candidates, evidence, decision, trade-offs, and conditions that would trigger reconsideration. Use an Architecture Decision Record (ADR) under `docs/decisions/`.
+Construct matched records during the sensor-overlap period. Specify temporal tolerance, spatial overlap, handling of multiple VIIRS detections within a MODIS footprint, duplicate policy, confidence filters, and target units before training. The primary candidate is LightGBM regression with a Tweedie objective; XGBoost may be compared if justified. Compare with identity and simple calibration baselines. Evaluate held-out chronological periods and report bias, error, subgroup performance, and detection-selection limitations.
 
-Evaluate candidates against:
-- Challenge fit and development time.
-- Team familiarity and maintainability.
-- Deployment and demo reliability.
-- Data format, volume, licensing, and update frequency.
-- Offline behavior and network dependency.
-- Performance and hardware constraints.
-- Accessibility and device support.
-- Cost, secrets management, and service limits.
-- Testing ecosystem and reproducibility.
+Output harmonized daily estimates plus a manifest containing source versions, features, target definition, split boundaries, parameters, metrics, code revision, and hashes. Do not describe estimates as ground truth.
 
-## 3. Required diagrams
+## Pillar 2 — calendar, anomalies, and forecast
 
-Create and maintain Mermaid diagrams when the actual design is known:
+Aggregate validated records into daily AOI sequences. Candidate channels include harmonized/observed FRP, active-pixel count, observation coverage/quality, and day-of-year encoding. Distinguish missing coverage from zero detections.
 
-1. **System context:** users, application, external APIs/datasets, and operators.
-2. **Container/component view:** runtime processes and responsibilities.
-3. **Critical data flow:** source acquisition through transformation, storage, and presentation.
-4. **Primary user sequence:** important user action through system response.
-5. **Deployment view:** environments, services, configuration, and network boundaries.
+Build seasonal baselines and anomaly scoring first. PatchTST is the selected temporal-model candidate, with proposed initial settings (16-day patches, stride 8, dimension 128, four encoder blocks, eight heads, dropout 0.1) treated as tunable starting values rather than proven optimal settings. Compare against seasonal-naive and persistence baselines. Forecast probabilistic regional activity over a 14-day horizon; never forecast exact ignition coordinates/times. Any alert threshold must be validated and documented.
 
-Diagrams must reflect the implementation and identify external dependencies. Do not draw speculative components as if they exist.
+## Pillar 3 — optional Prithvi optical audit
 
-## 4. Provisional logical boundaries
+Prithvi-EO 2.0 is used only with compatible HLS optical imagery and the correct local burn-scar checkpoint. It is not part of the active-fire thermal calibration path. Validate band order, scaling, spatial reference, nodata, date availability, checkpoint hash, and output alignment. If any required input is unavailable, the main application still works and the optional audit shows an explicit unavailable state.
 
-Use only the boundaries justified by the actual solution:
+## Artifact contracts
 
-- **Presentation:** user interaction, accessible rendering, input validation feedback.
-- **Application/use-case layer:** orchestrates user workflows.
-- **Domain/core logic:** challenge-specific rules and deterministic calculations.
-- **Data adapters:** load data from APIs, files, or services; validate and normalize source formats.
-- **Persistence/cache:** only when state or caching is needed.
-- **External integrations:** API clients, mapping, visualization, model inference, or other services actually selected.
-- **Operations/configuration:** startup, environment validation, logging, health checks, and deployment.
+- **Observation records:** source/product/platform, timestamp, coordinates, FRP and units, available quality/confidence flags, source file ID/version.
+- **Matched calibration records:** match/group ID, sensor IDs, timestamps, spatial relation, tolerances, feature fields, target definition, eligibility flags.
+- **Daily AOI records:** AOI geometry/version, date, sensor coverage, counts, FRP aggregates, missingness and quality summary.
+- **Calendar/forecast records:** date, observed/harmonized values, seasonal baseline, anomaly score, forecast quantiles, model version, training cutoff, quality state.
+- **Artifact manifest:** schema version, creation time, source hashes/versions, configuration, code commit, model hash, metrics, limitations.
 
-Do not create layers or microservices solely to make the diagram look sophisticated. Prefer the simplest architecture that supports the requirements and tests.
+Never silently convert units or treat missing records as zero activity.
 
-## 5. Data and error boundaries
+## Offline compute and app separation
 
-For each external input define schema, units, coordinate reference system where relevant, timestamps/time zones, missing-value policy, provenance, freshness, license, and failure behavior. Validate data at ingestion; avoid spreading source-specific quirks throughout the UI.
+Keep GitHub source, offline wheelhouse, model weights, and processed data in separate artifacts. A connected staging workflow prepares compatible wheels and checkpoints with manifests and hashes. An internet-disabled quarantine notebook verifies offline installation, imports, local checkpoint loading, and a representative forward pass before heavy compute.
 
-Never silently convert units or substitute fabricated data in a production/demo path. Any sample or synthetic data must be clearly labeled.
+Kaggle input datasets are read-only; write to the working output path. Export versioned artifacts through supported Kaggle outputs. Run the Streamlit/map/chart UI on a separate host. Do not depend on Docker, SSH, ngrok, external APIs, package indexes, or online model downloads from the offline compute kernel.
 
-## 6. Security and privacy
+## Planned source boundaries
 
-- Store credentials in environment configuration or a secret manager, never source control.
-- Commit an `.env.example` containing names and safe placeholders only.
-- Validate and constrain external inputs.
-- Avoid collecting personal data unless essential and justified.
-- Apply timeouts, sensible retries, and rate limits to network integrations.
-- Document data retention and third-party services if user data is involved.
+- `src/data/`: source adapters, schemas, inventory, validation, aggregation.
+- `src/geo/`: AOI validation, matching, optional rasterization.
+- `src/harmonization/`: features, baselines, training, evaluation, inference.
+- `src/calendar/`: seasonal baseline, anomalies, forecast interface/evaluation.
+- `src/models/`: PatchTST and optional Prithvi adapters.
+- `src/artifacts/`: contracts, manifests, serialization, integrity checks.
+- `app/`: AOI interaction and presentation.
+- `notebooks/`: staging, quarantine, data audit, training, backtesting, export.
+- `tests/`: unit, integration, scientific invariants, leakage, offline, end-to-end.
 
-## 7. Performance and reliability
-
-Measure the critical workflow before optimizing. Record dataset size, environment, warm/cold timing, and methodology. Consider bounded requests, pagination, caching with freshness rules, background work, and graceful degradation only where evidence justifies them.
-
-## 8. Architecture completion checklist
-
-- [ ] Selected challenge and constraints documented.
-- [ ] Requirements mapped to components.
-- [ ] Stack selected with a recorded rationale.
-- [ ] Context and data-flow diagrams match the real design.
-- [ ] Data contracts and failure paths documented.
-- [ ] Configuration and secret handling defined.
-- [ ] Testing boundaries and deployment target defined.
-- [ ] Trade-offs and deferred complexity recorded.
+This is the planned map and should be reconciled with the actual tree as code is added. Benchmark runtime and memory on the actual environment; planning estimates are not evidence.
