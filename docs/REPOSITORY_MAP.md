@@ -35,6 +35,8 @@ benchmark, notebook, and governance additions (issues #8, #9, #13, #16, #18,
 │   │                         # stage statuses + timings (pipeline_run.json) (issue #8)
 │   ├── inventory_firms.py   # FIRMS CSV evidence: hashes, rows, observed schema vs
 │   │                         # official attribute tables, missingness (issue #6)
+│   ├── build_app.py         # render the self-contained offline viewer app
+│   │                         # (app/index.html) from exported artifacts (issue #14)
 │   ├── run_demo.py           # reproducible scientific demo: pipeline + DEMO_REPORT.md
 │   │                         # + demo_summary.json with evidence links (issue #16)
 │   └── benchmark.py          # stage-wise timing + methodology report (issue #13)
@@ -53,12 +55,16 @@ benchmark, notebook, and governance additions (issues #8, #9, #13, #16, #18,
 ├── docs/                     # charter, requirements, architecture, model contracts,
 │   │                         # research, testing, risks, ADRs, demo guide (issue #16),
 │   │                         # dependency/security audit (issue #19), post-hackathon
-│   │                         # backlog (issue #20), evidence/firms_inventory (#6)
+│   │                         # backlog (issue #20), evidence/firms_inventory (#6),
+│   │                         # UI_VALIDATION (#14)
 │   └── decisions/
 ├── notebooks/                # six staged/offline workflow notebooks (issue #9):
 │                             # 01 staging, 02 quarantine, 03 validation,
 │                             # 04 harmonizer, 05 calendar/backtests, 06 export
-├── app/                      # PLANNED: Streamlit UI over exported artifacts
+├── app/                      # self-contained static viewer generated from the
+│                             # inference export by scripts/build_app.py (issue #14):
+│                             # index.html (map, 52-wk calendar, anomalies,
+│                             # forecast, provenance) + app_build.json
 ```
 
 ## Responsibilities and contracts
