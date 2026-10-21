@@ -1,0 +1,40 @@
+{
+  "errors": [],
+  "forecast_available": true,
+  "generated_at": "2026-10-22 00:00 UTC",
+  "inputs": {
+    "anomaly_records.csv": {
+      "sha256": "4a1a3c92862a1cfb3d53e936d743a24d998a78bf89ac3356a4a91c134ddfeb51"
+    },
+    "calendar_forecast_records.csv": {
+      "sha256": "3fc121586d5ef8e8234e5fc291ba8637d4298f5ce393876d264342ecb9dcdf33"
+    },
+    "harmonized_daily.csv": {
+      "sha256": "118e30d0db60660ee0e639016296ae18cc2bf73ff0b21ce67cba78e36eb5c44c"
+    }
+  },
+  "map_detections": 4285,
+  "output": "app/index.html",
+  "palette_contrast": {
+    "accent_on_bg": 7.996,
+    "anomaly_high_on_bg": 7.261,
+    "anomaly_low_on_bg": 5.589,
+    "focus_on_bg": 4.722,
+    "ink_on_accent_soft": 14.712,
+    "ink_on_bg": 17.057,
+    "ink_on_heat0": 15.817,
+    "ink_on_heat1": 12.1,
+    "ink_on_surface": 15.913,
+    "ink_secondary_on_bg": 9.145,
+    "ink_secondary_on_surface": 8.532,
+    "modis_on_bg": 5.619,
+    "viirs_on_bg": 5.473,
+    "white_on_heat3": 4.989,
+    "white_on_heat4": 7.781
+  },
+  "palette_passes_aa": true,
+  "schema_version": "1.0.0",
+  "status": "passed",
+  "synthetic_demo": true,
+  "wcag_aa_threshold": 4.5
+}
