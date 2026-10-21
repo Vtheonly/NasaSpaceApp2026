@@ -99,7 +99,7 @@ def e2e(tmp_path_factory):
     forecast = None
     forecast_cutoff = None
     try:
-        from src.models.patchtst import PatchTSTForecaster
+        from src.models.patchtst import PatchTSTForecaster, TorchDependencyError
 
         calendar_config = tiny_calendar_config(min_train_days=120)
         forecaster = PatchTSTForecaster(calendar_config.forecast, seed=calendar_config.seed).fit(
@@ -123,7 +123,9 @@ def e2e(tmp_path_factory):
             limitations=["experimental uncalibrated intervals"],
         )
         save_forecaster_bundle(out / "forecaster_v1", state, forecaster_manifest)
-    except ImportError:
+    except (ImportError, TorchDependencyError):
+        # Explicit unavailable state: the rest of the pipeline still works
+        # without the optional dependency (docs/ARCHITECTURE.md Pillar 2).
         forecast = None
 
     # Final app-consumable records.

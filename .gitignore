@@ -14,10 +14,11 @@ venv/
 .DS_Store
 
 # Model weights / processed artifacts stay out of GitHub (docs/ARCHITECTURE.md
-# "Compute and artifact separation").
-artifacts/
-outputs/
-models/
+# "Compute and artifact separation"). Patterns are ROOT-ANCHORED so they can
+# never swallow src/artifacts/ or src/models/.
+/artifacts/
+/outputs/
+/models/
 *.joblib
 *.pt
 *.pkl

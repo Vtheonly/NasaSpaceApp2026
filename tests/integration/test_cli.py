@@ -150,7 +150,9 @@ class TestTrainForecaster:
         assert artifact_dirs
         manifest = json.loads(artifact_dirs[0].joinpath("manifest.json").read_text())
         assert manifest["pipeline"] == "calendar_forecast"
-        assert manifest["model"]["name"] == "patchtst"
+        # PatchTST when torch is installed; the seasonal-naive baseline is the
+        # documented fallback without the optional dependency.
+        assert manifest["model"]["name"] in {"patchtst", "seasonal_naive"}
 
 
 class TestRunInference:
