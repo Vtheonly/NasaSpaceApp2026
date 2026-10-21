@@ -56,7 +56,7 @@ benchmark, notebook, and governance additions (issues #8, #9, #13, #16, #18,
 │   │                         # research, testing, risks, ADRs, demo guide (issue #16),
 │   │                         # dependency/security audit (issue #19), post-hackathon
 │   │                         # backlog (issue #20), evidence/firms_inventory (#6),
-│   │                         # UI_VALIDATION (#14)
+│   │                         # UI_VALIDATION (#14), OWNERSHIP (#3)
 │   └── decisions/
 ├── notebooks/                # six staged/offline workflow notebooks (issue #9):
 │                             # 01 staging, 02 quarantine, 03 validation,
