@@ -1,72 +1,37 @@
-# Testing and Validation Plan
+# Testing and Scientific Validation
 
-## Status
+## Five-pass data gate
 
-No implementation or test suite exists in the repository at initialization. This is the required validation plan to adapt after challenge and stack selection.
+Training must stop before model/GPU initialization if any critical validation error remains.
 
-## 1. Test strategy
+1. **Structural integrity:** file readability, required columns/types, partitions, duplicates, empty files, date coverage; emit inventory manifest and SHA-256 hashes.
+2. **Semantic/numerical validity:** field-specific null/NaN/Inf policies, coordinate bounds, timestamps, units, quality/confidence values, sensor-specific fields, suspicious FRP/geometry values; quarantine with reason codes rather than blindly deleting outliers.
+3. **Leakage/split integrity:** chronological splits, lagged features only, matched events and overlapping windows prevented from leaking; proposed starting split is train 2000–2021, validation 2022–2023, test 2024 onward, subject to available data.
+4. **Transformation invariants:** AOI boundaries, CRS assumptions, date bucketing, leap years, duplicates, missing days, units, aggregation totals where conservation is expected, normalization round trips.
+5. **Report and gate:** emit `inventory_manifest.json` and `dataset_audit_report.json`; fail closed on critical errors and summarize warnings/exclusions.
 
-### Unit tests
-Test pure transformations, domain rules, parsing, validation, calculations, and edge cases without network access.
+Field schemas and outlier thresholds must be justified against the actual FIRMS product. Extreme FRP is a review flag, not automatic proof of bad data.
 
-### Integration tests
-Test real boundaries between application components, storage, file formats, and external-service adapters. Use controlled fixtures or test doubles where appropriate.
+## Unit tests
 
-### End-to-end tests
-Exercise the primary user journey from input to visible result or exported artifact. Keep at least one repeatable smoke test.
+Test source parsing, schema drift, AOI geometry/boundaries, time normalization, leap days, aggregation, duplicate policy, matching tolerances, feature generation, seasonal baselines, anomaly edge cases, quantile ordering/horizon, artifact schema/version/hash, and UI empty/error states.
 
-### Data-quality tests
-Validate schema, types, ranges, units, coordinate systems, timestamps, missingness, duplicates, and expected coverage. Record dataset version and provenance.
+## Harmonization evaluation
 
-### Scientific or analytical validation
-If the solution makes scientific, geospatial, statistical, or ML claims, define a defensible baseline, evaluation dataset, metric, split strategy, uncertainty/limitations, and reproducible method. Avoid data leakage and unsupported causal claims.
+Compare Tweedie GBDT against identity and simple calibration baselines. Use held-out chronological evaluation. Report bias and error by FRP range, region, season, land cover/geometry where supported. Test matching-tolerance sensitivity, zero inflation, extreme observations, and selection bias from detections missed by MODIS.
 
-### Accessibility and usability
-Test keyboard navigation, labels, focus, contrast, responsive layouts, and the actual target environment where relevant. Obtain user feedback when feasible and document the method.
+## Calendar and forecast evaluation
 
-### Security and reliability
-Check secrets, input validation, dependency vulnerabilities, network timeouts, rate limits, error handling, and degraded/offline behavior appropriate to the product.
+Test missing coverage separately from zero detections. Validate anomaly false positives on ordinary periods and behavior on documented cases. Use rolling-origin backtests against seasonal-naive and persistence baselines; report suitable point metrics and quantile coverage/pinball loss. Record forecast issue time and training cutoff. Never randomly shuffle temporal observations into train/test.
 
-## 2. Required cases for the critical workflow
+## Optional Prithvi audit
 
-- Typical valid input.
-- Empty or missing input.
-- Malformed or out-of-range input.
-- Missing, stale, or contradictory source data.
-- External API timeout, error, or rate limit, if applicable.
-- Large enough input to expose practical performance issues.
-- Repeat execution and deterministic output where expected.
-- Recovery from a failed operation without corrupting state.
-- Clear user-facing errors that do not leak secrets or internal stack traces.
+Validate HLS band order/scaling, dimensions, nodata, CRS, date and checkpoint availability. Check output shape, finite values, alignment, and local checkpoint hash. This tests burn-scar segmentation, not active-fire timestamp accuracy.
 
-## 3. Test commands and environment
+## Offline quarantine
 
-Once the stack is chosen, record exact commands, supported versions, setup prerequisites, expected runtime, and expected outcomes. A reviewer must be able to run the suite without undocumented manual steps.
+With internet disabled, install only from local wheels; verify imports, local paths and checkpoint hashes, run a representative forward pass, and confirm no required step attempts external downloads. Ensure code never writes to `/kaggle/input/`. Fail clearly when dependencies or artifacts are absent.
 
-## 4. Baselines and performance
+## End-to-end and release gate
 
-For each important performance claim, record:
-- Hardware and software environment.
-- Dataset/input size and source.
-- Cold versus warm state.
-- Number of repetitions and summary statistic.
-- Measurement method and command.
-- Baseline, observed result, and acceptance threshold.
-
-Do not publish a performance claim from one unrepeatable run.
-
-## 5. Continuous integration
-
-Add CI only after defining the stack and commands. A minimal pipeline should install from locked dependencies, run format/lint/type checks where available, execute automated tests, and build/package the deliverable. CI should not require private production credentials.
-
-## 6. Release and demo checklist
-
-- [ ] Clean install tested.
-- [ ] Core workflow smoke test passes.
-- [ ] Required automated tests pass.
-- [ ] Dataset/version and attribution recorded.
-- [ ] Known limitations documented.
-- [ ] Demo can be completed using documented steps.
-- [ ] Network/service failure fallback prepared where relevant.
-- [ ] No secrets, restricted data, or unlicensed assets included.
-- [ ] Submission materials checked against official rules.
+Test clean setup → fixture validation → AOI aggregation → artifact loading → calendar/trend/anomaly/forecast UI. Empty AOIs, missing forecasts, unavailable optical imagery, corrupt artifacts, and disabled network must have explicit states. Record actual commands/results and environment. Never claim tests passed without preserved evidence.
