@@ -91,13 +91,14 @@ Implemented in `src/data/gate.py`. Training and inference call
   Anything VIIRS-derived is the target and is forbidden in the feature matrix
   (`assert_no_target_leakage` is enforced and unit-tested). No feature uses
   future information.
-- **Model:** LightGBM `LGBMRegressor` with `objective="tweedie"`,
-  `tweedie_variance_power=1.5` (selected primary candidate). Defaults are
-  regularized for small matched samples (num_leaves=15,
-  min_child_samples=40, lambda_l2=5.0, lr=0.03, max 2000 trees) and paired
-  with **chronological early stopping**: the last 365 days of the training
-  period form the internal stopping set; validation/test periods are never
-  used for stopping. `best_iteration_` is recorded in the manifest.
+- **Model:** LightGBM trained via its native API (`lgb.train` with a Tweedie
+  objective, `tweedie_variance_power=1.5`; selected primary candidate - no
+  scikit-learn dependency, keeping the offline wheelhouse minimal). Defaults
+  are regularized for small matched samples (num_leaves=15,
+  min_child_samples=40, lambda_l2=5.0, lr=0.03, max 2000 boosting rounds)
+  and paired with **chronological early stopping**: the last 365 days of the
+  training period form the internal stopping set; validation/test periods
+  are never used for stopping. `best_iteration` is recorded in the manifest.
 - **Baselines (mandatory comparisons):** `identity` (no correction) and
   `calibration` (single global scale factor fitted through the origin on the
   training split). SC-03 evidence = held-out Tweedie deviance vs both
