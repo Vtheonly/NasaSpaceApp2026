@@ -1,41 +1,44 @@
-# Architecture Decision Records (ADRs)
+# Architecture Decision Records
 
-Record decisions that materially affect architecture, dependencies, data handling, deployment, security, or project scope. Keep decisions short, evidence-based, and linked to relevant issues.
+These records document the selected direction for **Harmonization of MODIS and VIIRS Hot Spots**. Accepted means the project direction is chosen; it does not mean performance is proven.
 
-## Naming
+| ADR | Decision | Status |
+|---|---|---|
+| ADR-001 | Spatio-temporal harmonization and sequence modeling rather than primary image super-resolution | Selected; implementation/evidence required |
+| ADR-002 | Tweedie gradient-boosted regression for cross-sensor FRP harmonization | Primary candidate; compare with baselines |
+| ADR-003 | PatchTST candidate for calendar/anomaly/forecast modeling | Selected candidate; evaluate against seasonal baselines |
+| ADR-004 | Prithvi-EO 2.0 only for optional HLS optical burn-scar verification | Selected boundary; verify inputs/checkpoint |
+| ADR-005 | Use processed FIRMS georeferenced records before considering raw swath reconstruction | Selected approach; verify source coverage |
+| ADR-006 | Forecast probabilistic regional activity windows, not exact ignition points | Scientific boundary |
+| ADR-007 | Separate GitHub source, offline wheels, model weights, and processed data | Selected artifact strategy |
+| ADR-008 | Require internet-disabled quarantine before expensive compute | Operational gate |
+| ADR-009 | Five-pass data validation before training | Quality gate to implement |
+| ADR-010 | Run the user-facing app outside the isolated Kaggle compute environment | Selected deployment boundary |
 
-Use sequential filenames such as `0001-select-application-stack.md`.
+## ADR template
 
-## Template
+Use one file per significant decision, e.g. `ADR-002-tweedie-harmonization.md`.
 
 ```markdown
-# ADR-NNNN: Decision title
-
-- Status: Proposed | Accepted | Superseded | Rejected
-- Date: YYYY-MM-DD
-- Owners: names or roles
-- Related issues: #NNN
+# ADR-NNN: Short title
+- Status: Proposed | Accepted | Superseded
+- Date:
+- Owners:
 
 ## Context
-What problem, requirement, or constraint requires a decision?
-
-## Decision drivers
-List constraints and evaluation criteria.
-
-## Options considered
-Describe realistic alternatives and their trade-offs.
-
+Constraints, problem, and evidence.
 ## Decision
-State the chosen option and why evidence supports it.
-
+What was chosen and explicitly excluded.
+## Alternatives
+Realistic candidates.
+## Rationale
+Why the choice fits the challenge and constraints.
 ## Consequences
-Document benefits, costs, risks, migration implications, and limitations.
-
-## Verification
-How will the team verify that the decision works?
-
-## Revisit conditions
-What evidence or change would justify reconsidering it?
+Benefits, costs, risks, and required work.
+## Validation plan
+Tests, metrics, and evidence needed.
+## Revisit when
+Specific conditions that would justify changing the decision.
 ```
 
-Do not create an ADR for every trivial code change. Do create one when reversing a decision later would be costly or when the reasoning needs to be auditable.
+Record results and supersede a decision when evidence warrants it. Keep details in the relevant architecture/model documents and link issues rather than duplicating entire specifications.
