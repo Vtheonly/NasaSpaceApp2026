@@ -33,6 +33,8 @@ benchmark, notebook, and governance additions (issues #8, #9, #13, #16, #18,
 │   ├── run_inference.py      # AOI -> gate -> harmonize -> calendar -> forecast export
 │   ├── run_pipeline.py       # one-command orchestrator over the four CLIs with
 │   │                         # stage statuses + timings (pipeline_run.json) (issue #8)
+│   ├── inventory_firms.py   # FIRMS CSV evidence: hashes, rows, observed schema vs
+│   │                         # official attribute tables, missingness (issue #6)
 │   ├── run_demo.py           # reproducible scientific demo: pipeline + DEMO_REPORT.md
 │   │                         # + demo_summary.json with evidence links (issue #16)
 │   └── benchmark.py          # stage-wise timing + methodology report (issue #13)
@@ -51,7 +53,7 @@ benchmark, notebook, and governance additions (issues #8, #9, #13, #16, #18,
 ├── docs/                     # charter, requirements, architecture, model contracts,
 │   │                         # research, testing, risks, ADRs, demo guide (issue #16),
 │   │                         # dependency/security audit (issue #19), post-hackathon
-│   │                         # backlog (issue #20)
+│   │                         # backlog (issue #20), evidence/firms_inventory (#6)
 │   └── decisions/
 ├── notebooks/                # six staged/offline workflow notebooks (issue #9):
 │                             # 01 staging, 02 quarantine, 03 validation,

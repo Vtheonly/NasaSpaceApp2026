@@ -68,7 +68,10 @@ hash-verified artifacts; CLI scripts; a ~320-test suite and CI.
 (`scripts/run_pipeline.py`, stage statuses + timings), a reproducible
 scientific demo (`scripts/run_demo.py` + `docs/DEMO_GUIDE.md`, evidence-linked
 DEMO_REPORT.md), stage-wise performance benchmarks (`scripts/benchmark.py`,
-measured methodology), the six staged/offline workflow notebooks under
+measured methodology), a FIRMS source-inventory tool (`scripts/inventory_firms.py`
++ `docs/evidence/firms_inventory/`, verified against the official Earthdata
+attribute tables with hashes/row counts/observed schema, issue #6), the six
+staged/offline workflow notebooks under
 `notebooks/` (staging -> quarantine -> validation -> harmonizer -> calendar
 backtests -> export), issue templates + label taxonomy
 (`.github/ISSUE_TEMPLATE/`, CONTRIBUTING.md), and the dependency/security
@@ -100,6 +103,11 @@ python scripts/run_demo.py --output-dir out/demo
 
 # Stage-wise performance measurements (issue #13):
 python scripts/benchmark.py --output-dir out/bench
+
+# FIRMS source inventory: hashes, row counts, observed schema vs the official
+# attribute tables, missingness (issue #6; docs/evidence/firms_inventory/):
+python scripts/inventory_firms.py --source-dir <firms_csv_dir> \
+    --output-dir out/inventory
 
 # Individual stages, if you need them separately:
 python scripts/validate_data.py --source-dir <firms_csv_dir> --output-dir out/gate
