@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hotspot-harmonization"
+version = "0.1.0"
+description = "MODIS/VIIRS active-fire harmonization, burning-activity calendar, and probabilistic 14-day regional forecast pipeline (NASA Space Apps Challenge 2026)."
+readme = "README.md"
+requires-python = ">=3.11"
+# Dependency floors are deliberately ranges: docs/DEVELOPMENT.md requires pinning exact
+# versions only after a clean-environment install has actually passed.
+dependencies = [
+    "numpy>=1.26",
+    "pandas>=2.1",
+    "lightgbm>=4.1",
+    "PyYAML>=6.0",
+    "joblib>=1.3",
+]
+
+[project.optional-dependencies]
+# PatchTST is the selected temporal-model candidate (docs/ARCHITECTURE.md). PyTorch is kept
+# as an optional extra so that gate/aggregation/baseline paths run without it; the
+# forecaster degrades with a clear error message when torch is absent (graceful failure).
+forecast = ["torch>=2.2"]
+dev = ["pytest>=8.0", "ruff>=0.6"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+# Run pytest from the repository root without requiring an editable install.
+pythonpath = ["."]
+addopts = "-q --strict-markers"
+markers = [
+    "slow: long-running training tests (deselect with -m 'not slow')",
+    "requires_torch: tests that need the optional PyTorch dependency",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = ["tests/fixtures"]
+
+[tool.ruff.lint]
+# Quality checks referenced by issue #12 (CI Python quality checks).
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests intentionally import modules late (pytest.importorskip for the
+# optional torch dependency); scripts bootstrap sys.path before imports.
+"tests/**" = ["E402"]
+"scripts/**" = ["E402"]

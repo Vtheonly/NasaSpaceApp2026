@@ -1,0 +1,48 @@
+name: CI
+
+# Python quality checks + core tests (issue #12). No Kaggle secrets, no model
+# hub downloads, no large datasets: everything runs on committed fixtures.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  lint-and-test:
+    name: Lint + full tests (with PyTorch)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install CPU-only PyTorch (optional forecast dependency)
+        run: python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Install project and dev tools
+        run: python -m pip install -e ".[dev]"
+      - name: Ruff quality checks
+        run: ruff check src scripts tests
+      - name: Run the full test suite
+        run: pytest tests
+
+  lint-and-test-no-torch:
+    name: Core tests (PyTorch absent)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install project without the optional forecast dependency
+        run: python -m pip install -e ".[dev]"
+      - name: Core suite must pass without PyTorch
+        # PatchTST-specific tests skip themselves; gate, harmonization, and the
+        # seasonal-naive/persistence baselines must still pass (graceful
+        # degradation, docs/ARCHITECTURE.md Pillar 2).
+        run: pytest tests
