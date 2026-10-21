@@ -75,7 +75,9 @@ staged/offline workflow notebooks under
 `notebooks/` (staging -> quarantine -> validation -> harmonizer -> calendar
 backtests -> export), issue templates + label taxonomy
 (`.github/ISSUE_TEMPLATE/`, CONTRIBUTING.md), and the dependency/security
-audit + post-hackathon backlog documents. All evidence so far runs on
+audit + post-hackathon backlog documents, and enforced ownership
+(`.github/CODEOWNERS` + `docs/OWNERSHIP.md`, issue #3). All evidence so
+far runs on
 deterministic synthetic fixtures - see docs/MODEL_CONTRACTS.md for contracts,
 assumptions, and limitations.
 

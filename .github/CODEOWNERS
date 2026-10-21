@@ -1,0 +1,44 @@
+# CODEOWNERS: automatic review routing for the offline pipeline (issue #3)
+#
+# Every pull request that touches one of these paths automatically requests
+# review from the listed owner(s). This file is the enforced technical
+# mechanism behind docs/OWNERSHIP.md - ownership is not a page in a wiki, it
+# is what the review process actually requires.
+#
+# To add a component owner: add their GitHub username here AND update the
+# ownership matrix in docs/OWNERSHIP.md in the same PR.
+
+# Default owner for anything not matched below.
+* @Vtheonly
+
+# FIRMS data ingestion, validation, and source evidence (issue #6)
+/scripts/inventory_firms.py    @Vtheonly
+/src/data/                    @Vtheonly
+/docs/evidence/                @Vtheonly
+/docs/RESEARCH_AND_DATA.md     @Vtheonly
+
+# Harmonization (gate, matching, Tweedie GBDT)
+/src/harmonization/            @Vtheonly
+/src/geo/                      @Vtheonly
+/scripts/train_harmonizer.py   @Vtheonly
+
+# Calendar, anomalies, and forecasting (PatchTST + baselines)
+/src/calendar/                 @Vtheonly
+/src/models/                   @Vtheonly
+/scripts/train_forecaster.py   @Vtheonly
+
+# Inference export and orchestration
+/scripts/run_inference.py      @Vtheonly
+/scripts/run_pipeline.py       @Vtheonly
+/scripts/validate_data.py      @Vtheonly
+
+# Viewer app (issue #14)
+/app/                          @Vtheonly
+/scripts/build_app.py          @Vtheonly
+/docs/UI_VALIDATION.md         @Vtheonly
+
+# Offline staging / notebooks (issue #9)
+/notebooks/                    @Vtheonly
+
+# Optional Prithvi/HLS burn-scar audit branch: intentionally UNASSIGNED.
+# Anyone proposing that work must also propose its owner in the same PR.
