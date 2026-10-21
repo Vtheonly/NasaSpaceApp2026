@@ -38,6 +38,7 @@ addopts = "-q --strict-markers"
 markers = [
     "slow: long-running training tests (deselect with -m 'not slow')",
     "requires_torch: tests that need the optional PyTorch dependency",
+    "performance: stage-timing smoke tests with generous CI bounds (issue #13)",
 ]
 
 [tool.ruff]

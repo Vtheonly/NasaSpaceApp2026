@@ -1,0 +1,40 @@
+name: Documentation task
+description: Contracts, architecture, repository map, demo guide, requirement traceability, submission checklist
+labels: ["workstream: docs", "P2"]
+body:
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Which document and which drift it fixes (map-vs-tree, contract-vs-code, planning-vs-measured claims).
+    validations:
+      required: true
+  - type: textarea
+    id: tasks
+    attributes:
+      label: Tasks
+      placeholder: "- [ ] ...\n- [ ] ..."
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: The doc matches the actual implementation; every measured claim links to its artifact or test; aspirational items are labeled as such.
+    validations:
+      required: true
+  - type: dropdown
+    id: doc_type
+    attributes:
+      label: Document
+      options:
+        - README.md
+        - docs/ARCHITECTURE.md
+        - docs/MODEL_CONTRACTS.md
+        - docs/REPOSITORY_MAP.md
+        - docs/DEVELOPMENT.md
+        - docs/TESTING.md
+        - docs/DEMO_GUIDE.md
+        - docs/DEPENDENCY_AND_SECURITY_AUDIT.md
+        - docs/POST_HACKATHON_BACKLOG.md
+        - Other

@@ -35,3 +35,15 @@ With internet disabled, install only from local wheels; verify imports, local pa
 ## End-to-end and release gate
 
 Test clean setup → fixture validation → AOI aggregation → artifact loading → calendar/trend/anomaly/forecast UI. Empty AOIs, missing forecasts, unavailable optical imagery, corrupt artifacts, and disabled network must have explicit states. Record actual commands/results and environment. Never claim tests passed without preserved evidence.
+## Performance evidence (issue #13)
+
+Stage timings are *measured*, never copied from planning notes:
+`scripts/benchmark.py` times the gate, AOI/daily aggregation, matching,
+training, inference, climatology/anomalies, and the calendar/artifact
+round-trip separately on deterministic synthetic input and records the
+environment, input sizes, repetitions, and methodology in
+`benchmark_report.json`. `tests/performance/` keeps a CI-sized smoke version
+with generous bounds; full-size measurements belong to the offline run.
+Graceful-failure behavior stays pinned as passing tests in `tests/offline/`
+and `tests/integration/` (exit codes and explicit states, documented in
+docs/MODEL_CONTRACTS.md section 8), keeping the two evidence types separate.

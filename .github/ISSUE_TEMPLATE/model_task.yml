@@ -1,0 +1,45 @@
+name: Model task (harmonizer / forecast / Prithvi audit)
+description: Architecture, training, evaluation, backtesting, or model-contract work
+labels: ["workstream: model", "P1", "validation-needed"]
+body:
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Which pillar/model (Pillar 1 harmonizer, Pillar 2 calendar/forecast, Pillar 3 optional Prithvi audit)? Which contract section in docs/MODEL_CONTRACTS.md is affected?
+    validations:
+      required: true
+  - type: textarea
+    id: tasks
+    attributes:
+      label: Tasks
+      placeholder: "- [ ] ...\n- [ ] ..."
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies / blocked-by
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Must include how the model is compared against mandatory baselines and how leakage is prevented.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Required evidence
+      description: Test files (unit/scientific/e2e), held-out metrics artifacts, manifest fields to record.
+  - type: dropdown
+    id: scientific_boundary
+    attributes:
+      label: Scientific boundary check
+      options:
+        - Estimates stay labeled as estimates (not ground truth)
+        - Missing observations never become zero activity
+        - No exact-ignition-location claims
+        - Baseline comparison + chronological evaluation included
+        - N/A (not a model-output change)
+      description: Mark the guardrail(s) this task must preserve.

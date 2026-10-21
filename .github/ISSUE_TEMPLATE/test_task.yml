@@ -1,0 +1,39 @@
+name: Test / CI task
+description: Unit, scientific invariants, leakage, offline, e2e, performance tests and CI workflow changes
+labels: ["workstream: test", "P1"]
+body:
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Which suite (unit / scientific / integration / offline / e2e / performance) or CI behavior? Reference the issue or contract being enforced.
+    validations:
+      required: true
+  - type: textarea
+    id: tasks
+    attributes:
+      label: Tasks
+      placeholder: "- [ ] ...\n- [ ] ..."
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: e.g. test names, coverage of the failure path, CI passes with AND without the optional torch extra.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Required evidence
+      description: Test file paths and the CI run showing green (both torch and no-torch legs).
+  - type: checkboxes
+    id: guards
+    attributes:
+      label: Scientific guards to preserve
+      options:
+        - label: Leakage guards (rolling-origin training windows)
+        - label: Invariants (FRP conservation, no fabricated gap days)
+        - label: Baseline-beats checks before claims
+        - label: Graceful failure paths (exit codes + explicit states)

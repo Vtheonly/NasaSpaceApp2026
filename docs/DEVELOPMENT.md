@@ -11,14 +11,22 @@
 
 Record Python/platform, GPU/VRAM, CUDA/runtime, RAM, disk, internet state, mounted datasets, source revision, and config. The project design targets a 96 GB VRAM / 170 GB RAM Kaggle accelerator, but runtime inspection is authoritative.
 
-## Planned notebooks
+## Workflow notebooks
 
-- `01_stage_offline_assets.ipynb`: resolve compatible dependencies, stage wheels/checkpoints/data, validate terms, generate hashes/manifests.
-- `02_airgapped_quarantine.ipynb`: prove offline installation/import/local model loading and run a representative forward pass.
+All six are committed under `notebooks/` (issue #9); they call the CLI
+scripts and read their artifacts - reusable logic stays out of cells
+(docs/REPOSITORY_MAP.md).
+
+- `01_stage_offline_assets.ipynb`: resolve compatible dependencies, stage wheels/checkpoints/data, validate terms, generate hashes/manifests (connected).
+- `02_airgapped_quarantine.ipynb`: prove offline installation/import/local model loading and run a representative forward pass (internet disabled).
 - `03_validate_and_inventory_data.ipynb`: inventory files and run the five-pass validation gate.
 - `04_train_harmonizer.ipynb`: create overlap matches, train baselines and Tweedie GBDT, evaluate slices, export model/manifest.
 - `05_train_and_backtest_calendar.ipynb`: build daily sequences, evaluate seasonal baselines and PatchTST using rolling-origin backtests.
-- `06_export_artifacts.ipynb`: validate contracts, hash outputs, and produce an app-consumable manifest.
+- `06_export_artifacts.ipynb`: validate contracts, hash outputs, and produce an app-consumable export manifest.
+
+For the full journey in one command use `scripts/run_pipeline.py` (stage
+statuses + timings in `pipeline_run.json`) and `scripts/run_demo.py`
+(reproducible demo report, docs/DEMO_GUIDE.md).
 
 ## Offline artifact strategy
 

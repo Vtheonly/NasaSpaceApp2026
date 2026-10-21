@@ -73,12 +73,33 @@ def main(argv: list[str] | None = None) -> int:
 
     daily = pd.read_csv(args.daily_csv, parse_dates=["date"])
     if "value" not in daily.columns:
+        # Raw daily-AOI records (scripts/train_harmonizer.py) carry the per-sensor
+        # FRP columns instead of 'value'; derive the best observed series
+        # (VIIRS preferred, MODIS-observed days kept, gaps NaN) so the documented
+        # "raw daily AOI CSV" input branch is actually reachable (issue #8).
+        daily_value_columns = {
+            "viirs_coverage",
+            "modis_coverage",
+            "viirs_frp_sum_mw",
+            "modis_frp_sum_mw",
+        }
+        if not daily_value_columns.issubset(daily.columns):
+            print(
+                f"Input {args.daily_csv} must contain a 'value' column or the "
+                "daily AOI columns (viirs_frp_sum_mw/modis_frp_sum_mw + coverage "
+                "flags); produce it with scripts/train_harmonizer.py or "
+                "run_inference.py.",
+                file=sys.stderr,
+            )
+            return 1
+        from src.data.aggregation import best_observed_value
+
+        daily["value"] = best_observed_value(daily)
         print(
-            f"Input {args.daily_csv} must contain a 'value' column "
-            "(produce it with scripts/train_harmonizer.py or run_inference.py).",
+            "No 'value' column found; derived the best observed series "
+            "(VIIRS preferred, MODIS-observed days labeled downstream).",
             file=sys.stderr,
         )
-        return 1
     daily = daily.sort_values("date", kind="mergesort").reset_index(drop=True)
 
     # Accept either a harmonized daily CSV (full column contract) or a raw
