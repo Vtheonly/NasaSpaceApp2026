@@ -55,3 +55,7 @@ ignore = ["E501"]
 # optional torch dependency); scripts bootstrap sys.path before imports.
 "tests/**" = ["E402"]
 "scripts/**" = ["E402"]
+
+[tool.ruff.lint.isort]
+# Deterministic import classification (src-layout first-party).
+known-first-party = ["src", "tests"]
