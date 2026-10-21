@@ -43,3 +43,22 @@ This repository builds an interactive application that harmonizes MODIS and VIIR
 - [ ] Exact test commands/results are recorded.
 
 Every issue should define an outcome, tasks, acceptance criteria, dependencies, and evidence needed to close it.
+## Issue templates and labels
+
+Open issues through the templates in `.github/ISSUE_TEMPLATE/` (data, model,
+UI, offline environment, test, documentation). Every issue must state tasks,
+dependencies, acceptance criteria, and the evidence required to close it -
+issues that cannot name their evidence stay in the backlog.
+
+Label taxonomy (issue #18):
+
+| Label family | Values | Meaning |
+|---|---|---|
+| Priority | `P0`, `P1`, `P2` | Blocks the demo/submission; improves robustness/quality; polish or post-hackathon |
+| Workstream | `workstream: data`, `model`, `ui`, `offline`, `test`, `docs` | Maps to the module/area that owns the change |
+| State | `blocked`, `validation-needed` | Waits on another issue; needs measured evidence on real data before closing |
+| Scope | `deferred` | Post-hackathon backlog item (docs/POST_HACKATHON_BACKLOG.md); never blocks P0 |
+
+Consolidate generic or duplicate planning issues as implementation details
+become clearer, and link each issue to its requirement ID from
+docs/CHALLENGE_AND_REQUIREMENTS.md when one applies.

@@ -48,6 +48,9 @@ The supplied design targets a Kaggle environment with 96 GB VRAM and 170 GB RAM,
 - [Research and data governance](docs/RESEARCH_AND_DATA.md)
 - [Risk register](docs/RISK_REGISTER.md)
 - [Architecture decisions](docs/decisions/README.md)
+- [Scientific demo guide](docs/DEMO_GUIDE.md)
+- [Dependency and security audit](docs/DEPENDENCY_AND_SECURITY_AUDIT.md)
+- [Post-hackathon backlog](docs/POST_HACKATHON_BACKLOG.md)
 - [GitHub Issues](https://github.com/Vtheonly/NasaSpaceApp2026/issues)
 
 ## Status and definition of done
@@ -58,12 +61,22 @@ matching; the LightGBM/Tweedie harmonizer with identity and calibration
 baselines and held-out chronological evaluation; the seasonal calendar and
 anomaly scoring; the PatchTST 14-day probabilistic forecast candidate with
 seasonal-naive/persistence baselines and rolling-origin backtests; versioned,
-hash-verified artifacts; CLI scripts; a ~294-test suite and CI (issue #12).
-All evidence so far runs on deterministic synthetic fixtures — see
-docs/MODEL_CONTRACTS.md for contracts, assumptions, and limitations.
+hash-verified artifacts; CLI scripts; a ~320-test suite and CI.
 
-**Still planned:** the Streamlit app, the six staging/offline notebooks, the
-optional Prithvi optical audit, and validation on real FIRMS archives.
+**Also implemented:** a one-command end-to-end orchestrator
+(`scripts/run_pipeline.py`, stage statuses + timings), a reproducible
+scientific demo (`scripts/run_demo.py` + `docs/DEMO_GUIDE.md`, evidence-linked
+DEMO_REPORT.md), stage-wise performance benchmarks (`scripts/benchmark.py`,
+measured methodology), the six staged/offline workflow notebooks under
+`notebooks/` (staging -> quarantine -> validation -> harmonizer -> calendar
+backtests -> export), issue templates + label taxonomy
+(`.github/ISSUE_TEMPLATE/`, CONTRIBUTING.md), and the dependency/security
+audit + post-hackathon backlog documents. All evidence so far runs on
+deterministic synthetic fixtures - see docs/MODEL_CONTRACTS.md for contracts,
+assumptions, and limitations.
+
+**Still planned:** the Streamlit app, the optional Prithvi optical audit, and
+validation on real FIRMS archives.
 
 A component is complete only when its acceptance criteria, tests, data
 provenance, and reproducible evidence are recorded. Final delivery requires a
@@ -76,6 +89,17 @@ official submission checklist.
 ```bash
 pip install -e ".[dev,forecast]"   # torch CPU wheels: --index-url https://download.pytorch.org/whl/cpu
 
+# One command, full journey (gate -> harmonizer -> forecaster -> export):
+python scripts/run_pipeline.py --source-dir <firms_csv_dir> --output-dir out \
+    --aoi "bbox:-123.5,39.5,-120.5,42.0"
+
+# Reproducible demo on the committed SYNTHETIC fixtures (docs/DEMO_GUIDE.md):
+python scripts/run_demo.py --output-dir out/demo
+
+# Stage-wise performance measurements (issue #13):
+python scripts/benchmark.py --output-dir out/bench
+
+# Individual stages, if you need them separately:
 python scripts/validate_data.py --source-dir <firms_csv_dir> --output-dir out/gate
 python scripts/train_harmonizer.py --source-dir <firms_csv_dir> --output-dir out \
     --aoi "bbox:-123.5,39.5,-120.5,42.0"

@@ -1,0 +1,38 @@
+name: UI / demo task (app, map, calendar views)
+description: Streamlit app views, demo rehearsal, or presentation evidence over exported artifacts
+labels: ["workstream: ui", "P1"]
+body:
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Which view/flow (AOI selection, hotspot map, 52-week calendar, trends, anomaly details, forecast uncertainty, provenance panel)? The app runs on a separate host over exported artifacts only.
+    validations:
+      required: true
+  - type: textarea
+    id: tasks
+    attributes:
+      label: Tasks
+      placeholder: "- [ ] ...\n- [ ] ..."
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies / blocked-by
+      description: Usually blocked by an exported artifact (out/inference/...) or a demo-guide step.
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Include the explicit empty/missing/fallback states the view must show (empty AOI, no forecast, missing coverage, unavailable optional audit).
+    validations:
+      required: true
+  - type: checkboxes
+    id: labeling_rules
+    attributes:
+      label: Labeling rules
+      options:
+        - label: Observed / harmonized / forecast / cached / sample data are labeled distinctly
+        - label: Missing coverage renders as missing, never as zero activity
+        - label: No synthetic result is presented as real

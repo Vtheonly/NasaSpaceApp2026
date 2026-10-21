@@ -1,0 +1,38 @@
+name: Offline environment task (staging / quarantine / Kaggle)
+description: Wheelhouse, airgapped install, checkpoint staging, quarantine checks, Kaggle boundaries
+labels: ["workstream: offline", "P1"]
+body:
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Which environment (connected staging, airgapped quarantine, Kaggle compute, app host)? Which notebook stage (01-06) or runtime constraint is affected?
+    validations:
+      required: true
+  - type: textarea
+    id: tasks
+    attributes:
+      label: Tasks
+      placeholder: "- [ ] ...\n- [ ] ..."
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies / blocked-by
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Must state how offline behavior is proven (quarantine report, tests/offline, no-index install log), not assumed.
+    validations:
+      required: true
+  - type: checkboxes
+    id: offline_rules
+    attributes:
+      label: Offline rules
+      options:
+        - label: No PyPI/GitHub/Hugging Face/REST calls during offline compute
+        - label: /kaggle/input treated read-only; outputs only under the working path
+        - label: Wheels/checkpoints hash-verified from the staging manifest
+        - label: No Docker/SSH/ngrok dependencies inside the offline kernel
