@@ -1,0 +1,38 @@
+# Calendar / forecast pipeline configuration (defaults mirror src/common/config.py).
+# PatchTST starting values follow docs/ARCHITECTURE.md Pillar 2 and are tunable.
+seed: 2026
+
+seasonal:
+  window_days: 7
+  min_samples_per_day: 2
+  leap_policy: pool_feb29_with_feb28
+
+anomaly:
+  ratio_epsilon: 1.0e-6
+  high_threshold: 2.0
+  low_threshold: 0.5
+
+forecast:
+  horizon_days: 14
+  quantiles: [0.1, 0.5, 0.9]
+  patchtst:
+    context_len: 90
+    patch_len: 16
+    stride: 8
+    d_model: 128
+    n_encoder_blocks: 4
+    n_heads: 8
+    dropout: 0.1
+    dim_feedforward: 512
+  trainer:
+    epochs: 60
+    batch_size: 32
+    learning_rate: 0.001
+    weight_decay: 0.0001
+    patience: 6
+    validation_fraction: 0.2
+
+backtest:
+  n_origins: 4
+  origin_spacing_days: 14
+  min_train_days: 90

@@ -41,6 +41,7 @@ The supplied design targets a Kaggle environment with 96 GB VRAM and 170 GB RAM,
 - [Project charter](docs/PROJECT_CHARTER.md)
 - [Challenge requirements and traceability](docs/CHALLENGE_AND_REQUIREMENTS.md)
 - [Architecture](docs/ARCHITECTURE.md)
+- [Model contracts and scientific assumptions](docs/MODEL_CONTRACTS.md)
 - [Repository map](docs/REPOSITORY_MAP.md)
 - [Development and offline workflow](docs/DEVELOPMENT.md)
 - [Testing and five-pass validation](docs/TESTING.md)
@@ -51,4 +52,35 @@ The supplied design targets a Kaggle environment with 96 GB VRAM and 170 GB RAM,
 
 ## Status and definition of done
 
-These documents define the selected architecture and delivery plan; they do not prove that models have trained or that the application is implemented. A component is complete only when its acceptance criteria, tests, data provenance, and reproducible evidence are recorded. Final delivery requires a clean AOI-to-calendar demo, validated harmonization and forecasting, a passing offline quarantine test, visible uncertainty/limitations, and a verified official submission checklist.
+**Implemented and tested (offline ML pipeline):** the five-pass data gate with
+fail-closed audit reports; AOI validation and overlap-period MODIS/VIIRS
+matching; the LightGBM/Tweedie harmonizer with identity and calibration
+baselines and held-out chronological evaluation; the seasonal calendar and
+anomaly scoring; the PatchTST 14-day probabilistic forecast candidate with
+seasonal-naive/persistence baselines and rolling-origin backtests; versioned,
+hash-verified artifacts; CLI scripts; a ~294-test suite and CI (issue #12).
+All evidence so far runs on deterministic synthetic fixtures — see
+docs/MODEL_CONTRACTS.md for contracts, assumptions, and limitations.
+
+**Still planned:** the Streamlit app, the six staging/offline notebooks, the
+optional Prithvi optical audit, and validation on real FIRMS archives.
+
+A component is complete only when its acceptance criteria, tests, data
+provenance, and reproducible evidence are recorded. Final delivery requires a
+clean AOI-to-calendar demo, validated harmonization and forecasting, a passing
+offline quarantine test, visible uncertainty/limitations, and a verified
+official submission checklist.
+
+## Quickstart (offline pipeline)
+
+```bash
+pip install -e ".[dev,forecast]"   # torch CPU wheels: --index-url https://download.pytorch.org/whl/cpu
+
+python scripts/validate_data.py --source-dir <firms_csv_dir> --output-dir out/gate
+python scripts/train_harmonizer.py --source-dir <firms_csv_dir> --output-dir out \
+    --aoi "bbox:-123.5,39.5,-120.5,42.0"
+python scripts/run_inference.py --source-dir <firms_csv_dir> \
+    --harmonizer-dir out/<harmonizer artifact> --output-dir out/inference \
+    --aoi "bbox:-123.5,39.5,-120.5,42.0"
+pytest tests    # full suite; ruff check src scripts tests for quality
+```

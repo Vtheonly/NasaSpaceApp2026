@@ -1,0 +1,25 @@
+# Never commit environments, caches, secrets, or large generated artifacts
+# (see CONTRIBUTING.md offline rules).
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+.env
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+.DS_Store
+
+# Model weights / processed artifacts stay out of GitHub (docs/ARCHITECTURE.md
+# "Compute and artifact separation").
+artifacts/
+outputs/
+models/
+*.joblib
+*.pt
+*.pkl
+*.ckpt
+*.tar.gz
