@@ -61,10 +61,11 @@ class TweedieGBDTHarmonizer:
 
     @property
     def params(self) -> dict:
+        """Recorded training parameters (native LightGBM train API)."""
         return {
             "objective": "tweedie",
             "tweedie_variance_power": self.model_config.tweedie_variance_power,
-            "n_estimators": self.model_config.n_estimators,
+            "num_boost_round": self.model_config.n_estimators,
             "learning_rate": self.model_config.learning_rate,
             "num_leaves": self.model_config.num_leaves,
             "min_child_samples": self.model_config.min_child_samples,
@@ -74,7 +75,7 @@ class TweedieGBDTHarmonizer:
             "lambda_l2": self.model_config.lambda_l2,
             "early_stopping_rounds": self.model_config.early_stopping_rounds,
             "early_stopping_days": self.model_config.early_stopping_days,
-            "random_state": self.seed,
+            "seed": self.seed,
         }
 
     def fit(
@@ -100,37 +101,47 @@ class TweedieGBDTHarmonizer:
             raise ValueError("Tweedie targets must be non-negative")
         self.feature_names = list(X.columns)
 
-        X_fit, y_fit, eval_set = X, y_array, None
-        callbacks = None
+        X_fit, y_fit = X, y_array
+        valid_sets = None
+        callbacks = []
         if stop_dates is not None:
             dates = pd.to_datetime(pd.Series(stop_dates).reset_index(drop=True))
             cutoff = dates.max() - pd.Timedelta(days=self.model_config.early_stopping_days)
             stop_mask = (dates <= cutoff).to_numpy()
             if stop_mask.sum() >= 30 and (~stop_mask).sum() >= 10:
                 X_fit, y_fit = X.loc[stop_mask], y_array[stop_mask]
-                eval_set = [(X.loc[~stop_mask], y_array[~stop_mask])]
-                callbacks = [
+                stop_set = lgbm.Dataset(X.loc[~stop_mask], label=y_array[~stop_mask])
+                valid_sets = [stop_set]
+                callbacks.append(
                     lgbm.early_stopping(self.model_config.early_stopping_rounds, verbose=False)
-                ]
+                )
 
-        self._model = lgbm.LGBMRegressor(
-            objective="tweedie",
-            tweedie_variance_power=self.model_config.tweedie_variance_power,
-            n_estimators=self.model_config.n_estimators,
-            learning_rate=self.model_config.learning_rate,
-            num_leaves=self.model_config.num_leaves,
-            min_child_samples=self.model_config.min_child_samples,
-            feature_fraction=self.model_config.feature_fraction,
-            bagging_fraction=self.model_config.bagging_fraction,
-            bagging_freq=self.model_config.bagging_freq,
-            lambda_l2=self.model_config.lambda_l2,
-            random_state=self.seed,
-            deterministic=True,
-            force_row_wise=True,
-            verbosity=-1,
+        # Native LightGBM training API: no scikit-learn dependency, which keeps
+        # the offline wheelhouse minimal (docs/DEVELOPMENT.md offline staging).
+        params: dict = {
+            "objective": "tweedie",
+            "tweedie_variance_power": self.model_config.tweedie_variance_power,
+            "learning_rate": self.model_config.learning_rate,
+            "num_leaves": self.model_config.num_leaves,
+            "min_child_samples": self.model_config.min_child_samples,
+            "feature_fraction": self.model_config.feature_fraction,
+            "bagging_fraction": self.model_config.bagging_fraction,
+            "bagging_freq": self.model_config.bagging_freq,
+            "lambda_l2": self.model_config.lambda_l2,
+            "seed": self.seed,
+            "deterministic": True,
+            "force_row_wise": True,
+            "verbosity": -1,
+        }
+        train_set = lgbm.Dataset(X_fit, label=y_fit)
+        self._model = lgbm.train(
+            params,
+            train_set,
+            num_boost_round=self.model_config.n_estimators,
+            valid_sets=valid_sets,
+            callbacks=callbacks or None,
         )
-        self._model.fit(X_fit, y_fit, eval_set=eval_set, callbacks=callbacks)
-        best = getattr(self._model, "best_iteration_", None)
+        best = getattr(self._model, "best_iteration", None)
         # LightGBM reports 0 when early stopping never triggered; normalize to None.
         self.best_iteration_ = int(best) if best else None
         if self.best_iteration_:
@@ -146,10 +157,7 @@ class TweedieGBDTHarmonizer:
             raise ValueError(
                 f"Feature mismatch: trained on {self.feature_names}, got {list(X.columns)}"
             )
-        kwargs = {}
-        if self.best_iteration_:
-            kwargs["num_iteration"] = self.best_iteration_
-        raw = self._model.predict(X, **kwargs)
+        raw = self._model.predict(X, num_iteration=self.best_iteration_)
         # VIIRS-equivalent FRP is a non-negative physical quantity.
         return np.clip(np.asarray(raw, dtype=float), 0.0, None)
 
@@ -157,18 +165,17 @@ class TweedieGBDTHarmonizer:
     def feature_importances(self) -> dict[str, float]:
         if self._model is None:
             raise ModelNotFittedError("feature_importances requires a fitted model")
+        importance = self._model.feature_importance()
         return {
             name: float(value)
-            for name, value in zip(self.feature_names, self._model.feature_importances_, strict=False)
+            for name, value in zip(self.feature_names, importance, strict=True)
         }
 
     @property
     def n_boosted_trees(self) -> int:
         if self._model is None:
             raise ModelNotFittedError("n_boosted_trees requires a fitted model")
-        return int(self._model.n_estimators_) if hasattr(self._model, "n_estimators_") else int(
-            self.model_config.n_estimators
-        )
+        return int(self._model.num_trees())
 
 
 __all__ = [

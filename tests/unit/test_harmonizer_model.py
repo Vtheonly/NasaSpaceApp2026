@@ -118,5 +118,6 @@ def test_params_record_configuration():
     params = model.params
     assert params["objective"] == "tweedie"
     assert params["num_leaves"] == 7
-    assert params["random_state"] == 99
+    assert params["num_boost_round"] == HarmonizerModelConfig().n_estimators
+    assert params["seed"] == 99
     assert params["lambda_l2"] == HarmonizerModelConfig().lambda_l2
