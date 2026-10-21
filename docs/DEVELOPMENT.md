@@ -1,60 +1,46 @@
-# Development Guide
+# Development and Offline Execution Guide
 
-## Status
+## Environments
 
-The language, runtime, package manager, and build system have not yet been selected. The commands below are therefore requirements for the eventual guide, not executable commands for the current repository.
+1. **Connected staging:** acquire approved wheels, checkpoints, and permitted data; generate hashes/manifests.
+2. **Offline quarantine:** with internet disabled, verify package installation, imports, local checkpoint loading, and representative inference.
+3. **Kaggle compute:** validate data, aggregate, train/evaluate, and export artifacts after quarantine passes.
+4. **Application host:** run the user-facing web UI separately using exported artifacts.
 
-## 1. Supported environment
+## Runtime discovery
 
-Document and pin:
-- Operating systems and minimum versions.
-- Language/runtime and exact supported version.
-- Package manager and lockfile.
-- Required system packages and native libraries.
-- External accounts, API keys, and service configuration.
-- Optional GPU/accelerator requirements.
-- Disk, memory, and network requirements.
-- Known platform-specific limitations.
+Record Python/platform, GPU/VRAM, CUDA/runtime, RAM, disk, internet state, mounted datasets, source revision, and config. The project design targets a 96 GB VRAM / 170 GB RAM Kaggle accelerator, but runtime inspection is authoritative.
 
-## 2. Clean setup procedure
+## Planned notebooks
 
-After the stack is selected, provide a tested, copy-pasteable sequence that:
-1. Checks prerequisites and prints actionable errors.
-2. Clones the repository and selects the supported revision.
-3. Creates an isolated environment where appropriate.
-4. Installs dependencies from the lockfile.
-5. Validates required configuration without exposing secret values.
-6. Acquires or prepares the smallest permitted sample dataset.
-7. Runs format/lint/type checks and unit tests.
-8. Starts the application or pipeline.
-9. Runs a documented smoke test.
-10. Cleans generated artifacts safely.
+- `01_stage_offline_assets.ipynb`: resolve compatible dependencies, stage wheels/checkpoints/data, validate terms, generate hashes/manifests.
+- `02_airgapped_quarantine.ipynb`: prove offline installation/import/local model loading and run a representative forward pass.
+- `03_validate_and_inventory_data.ipynb`: inventory files and run the five-pass validation gate.
+- `04_train_harmonizer.ipynb`: create overlap matches, train baselines and Tweedie GBDT, evaluate slices, export model/manifest.
+- `05_train_and_backtest_calendar.ipynb`: build daily sequences, evaluate seasonal baselines and PatchTST using rolling-origin backtests.
+- `06_export_artifacts.ipynb`: validate contracts, hash outputs, and produce an app-consumable manifest.
 
-The sequence must be tested on a clean environment. Do not invent commands before knowing the stack.
+## Offline artifact strategy
 
-## 3. Configuration
+Keep GitHub for source, docs, tests, and small fixtures. Store platform-compatible Linux wheels, model weights, and processed data in separate versioned datasets. Verify Python/platform/CUDA compatibility; top-level package downloads alone do not guarantee all transitive dependencies are available offline. Respect data/model terms.
 
-- Provide `.env.example` only if environment variables are used.
-- Explain each variable, whether it is required, its safe default, and how to obtain its value.
-- Fail early with a clear message when required configuration is missing.
-- Never log tokens, passwords, or full sensitive payloads.
-- Keep development, test, and deployment configuration separate.
+Illustrative staging command, to be adjusted after dependencies are locked:
 
-## 4. Daily workflow
+```bash
+python -m pip download --only-binary=:all: --dest wheelhouse -r requirements-offline.txt
+sha256sum wheelhouse/* > wheelhouse-SHA256SUMS.txt
+```
 
-1. Select a scoped issue and confirm acceptance criteria.
-2. Inspect relevant code, docs, and data contracts.
-3. Implement the smallest coherent change.
-4. Add or update tests for expected and failure behavior.
-5. Run formatting, linting, type checks, tests, and smoke checks.
-6. Update documentation, data provenance, and diagrams when affected.
-7. Provide evidence in the issue or pull request.
-8. Review for secrets, unintended data, dependency changes, and generated files.
+In the offline notebook, install only from the local wheelhouse using `pip --no-index --find-links=...`; set appropriate offline flags; verify file hashes and run model smoke tests. A failed network request by itself does not prove the complete pipeline is offline-safe.
 
-## 5. Dependencies
+## Kaggle boundaries
 
-Every dependency should have a clear purpose. Pin or lock dependencies, check license compatibility, remove unused packages, and document external services. Record why a heavy framework or model is needed rather than adopting it by default.
+Treat `/kaggle/input/` as read-only; write to `/kaggle/working/`. Do not rely on PyPI, Hugging Face, GitHub, REST APIs, or online model downloads during offline compute. Save checkpoints and reports before sessions end. Export outputs using supported Kaggle output/dataset workflows. Do not host the public app or depend on Docker/SSH/ngrok tunnels inside the isolated compute notebook.
 
-## 6. Troubleshooting
+## Application
 
-Maintain a table with symptom, likely cause, diagnostic command, resolution, and environment. Include setup failures, network/API limits, malformed data, missing configuration, startup failures, and demo-day fallback procedures once they are known.
+The selected direction is a separate Streamlit-based web interface with map/chart components, using versioned exported artifacts. Pin exact dependencies only after implementation and clean-environment testing. The UI must label cached/sample data and must not silently fetch the network in offline/demo mode.
+
+## Reproducibility
+
+Every run should record code commit, source product/version and hashes, config, environment, split boundaries, random seeds where applicable, model parameters, metrics, artifact hashes, and limitations. Setup commands become authoritative only after a clean setup has actually passed.
