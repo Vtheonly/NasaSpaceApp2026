@@ -1,63 +1,47 @@
-# Research, Data Sources, and Governance
+# Research, Data Sources, and Scientific Governance
 
-## 1. Research standard
+## Research rules
 
-Use evidence to validate the problem, solution, and claims. Prefer original sources and authoritative publications. For each important claim, capture the source, publication/update date, retrieval date, relevant excerpt or finding, confidence, and how it affects a design decision.
+Use official product documentation for source semantics, schema, quality flags, temporal coverage, licensing, and limitations. Record URLs, access date, version, sample checks, and which claims each source supports. The selected architecture comes from the supplied project specification; numerical performance estimates must be independently measured.
 
-## 2. Data source registry
+## Core source: NASA FIRMS
 
-Create one entry per dataset, API, map layer, model, paper, or other external resource.
+The intended primary inputs are processed georeferenced FIRMS MODIS and VIIRS active-fire records, including historical archives where available. Before selecting concrete product variants, verify the current official FIRMS catalog and archive access. Record sensor/platform, time range, spatial footprint caveats, columns, units, quality/confidence flags, missing-value conventions, formats, coverage, access limits, terms, and attribution.
 
-| Field | Required record |
-|---|---|
-| Source ID | Stable identifier, e.g. SRC-001 |
-| Name and publisher | Original source/provider |
-| URL and access date | Direct source link and retrieval date |
-| Purpose | Requirement or feature supported |
-| Coverage | Geography, time range, population, resolution, or domain |
-| Format and schema | Types, fields, units, CRS, timestamps |
-| Update cadence | Static, periodic, or live |
-| License/terms | Exact terms and redistribution constraints |
-| Attribution | Required credit or citation wording |
-| Access | Public, registration, API key, quota, or paid |
-| Quality caveats | Missingness, bias, uncertainty, known limitations |
-| Processing | Cleaning, filtering, conversion, aggregation |
-| Version/provenance | Snapshot, release, query parameters, checksum if practical |
-| Fallback | Behavior if the source is unavailable |
-| Owner/status | Responsible person and verification status |
+Do not assume every candidate feature (brightness temperature, scan angle, view geometry, etc.) exists in a selected CSV. Use only observed fields or join a documented auxiliary source.
 
-Never assume that a publicly downloadable dataset is free to redistribute or use without attribution.
+## Matching and harmonization
 
-## 3. Data pipeline record
+Document the overlap-period sensors/platforms, temporal tolerance, spatial overlap method, multiple VIIRS detections within a MODIS footprint, duplicate policy, confidence filtering, missing coverage, FRP aggregation, and target units. Evaluate on held-out dates/regions. Matching is subject to selection bias: a matched dataset cannot directly describe fires never detected by one sensor.
 
-For every nontrivial pipeline, document:
-1. Original source and version.
-2. Acquisition method and query/filters.
-3. Raw versus processed artifact locations.
-4. Schema and validation rules.
-5. Unit, timezone, and coordinate transformations.
-6. Missing values, duplicates, and outlier handling.
-7. Any manual corrections and their evidence.
-8. Output schema and reproducibility instructions.
-9. Tests and known limitations.
+## Candidate source registry
 
-Do not commit large raw datasets, personally identifiable information, access tokens, or material with unclear rights. Provide a download/preparation script and checksum or a small permitted fixture when practical.
+| Source | Role | Validation |
+|---|---|---|
+| NASA FIRMS MODIS archive | Historical observations | Product/platform, schema, dates, quality flags, terms |
+| NASA FIRMS VIIRS archive | Overlap matching and modern observations | Product variant, coverage, schema, terms |
+| MODIS land-cover product (e.g. MCD12Q1) | Optional context feature | Version, class mapping, temporal alignment, terms |
+| Elevation data | Optional context feature | Resolution, CRS, coverage, resampling |
+| HLS Landsat/Sentinel-2 imagery | Optional burn-scar audit | Bands, date availability, nodata, license |
+| Prithvi-EO 2.0 burn-scar checkpoint | Optional segmentation | Official version, terms, local hash, input contract |
 
-## 4. NASA and scientific sources
+These are candidates to validate, not proof that the data have been downloaded. Prefer processed FIRMS records over full global raw orbital-swath reconstruction during the hackathon unless evidence shows the processed approach is insufficient.
 
-Select sources based on the actual challenge. Potential source categories may include NASA open-data portals, mission datasets, Earth observation products, climate/environmental observations, scientific publications, or government geospatial datasets. These are possibilities, not selected dependencies. Confirm that the source is relevant, accessible, sufficiently documented, and permitted by its terms.
+## Data products
 
-## 5. Research log
+Keep source archives/manifests, validated normalized records, matched calibration records, daily AOI aggregates, harmonized output, calendar/anomaly/forecast output, and optional optical audit output distinct. Parquet partitioning is a candidate; measure storage/query behavior on a sample before deciding. Do not assume total data volume until inventoried.
 
-For each experiment or research question, record:
-- Question and hypothesis.
-- Method and sources.
-- Environment and versions.
-- Result and evidence.
-- Interpretation and uncertainty.
-- Decision made or next action.
-- Reproduction steps.
+## Research questions
 
-## 6. Responsible claims
+- Which product variants and platforms cover the needed dates?
+- Is the target summed VIIRS FRP within a MODIS footprint, daily regional FRP, or another explicitly defined quantity?
+- How are missing coverage and zero detections distinguished?
+- How much discrepancy comes from sensor geometry, thresholds, timing, or actual fire evolution?
+- Does the model beat a simple baseline on held-out data?
+- Does PatchTST beat seasonal-naive forecasting under rolling-origin evaluation?
+- Are anomaly thresholds stable across sensor eras and AOI sizes?
+- Is suitable HLS imagery available for optional audits?
 
-Distinguish measured outcomes from hypotheses and illustrative examples. Disclose resolution limits, uncertainty, geographic/time coverage, model limitations, and where expert review is needed. Do not imply that a hackathon prototype replaces official emergency, medical, scientific, or policy decision-making.
+## Provenance
+
+Every result records source version, retrieval identifier/date, hashes where practical, schema and units, filtering/quarantine counts, processing config, code commit, split boundaries, matching rules, model config, metrics, artifact hash, and known limitations. Verify exact scientific citations in the implementation/model report before submission. Planning estimates such as sub-100-ms inference or under-15-minute training are not facts until measured on the actual runtime.
