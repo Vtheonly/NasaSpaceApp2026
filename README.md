@@ -1,71 +1,54 @@
-# NASA Space Apps 2026
+# Harmonization of MODIS and VIIRS Hot Spots
 
-> **Project status:** Discovery and planning scaffold. The repository was empty when this documentation was initialized. The actual NASA Space Apps challenge, team, solution, implementation stack, and deployment target have not yet been supplied or verified. This repository deliberately distinguishes confirmed facts from decisions that remain open.
+**NASA Space Apps Challenge 2026 · Earth Science · Software**
 
-## Purpose
+Build an interactive web application that harmonizes MODIS and VIIRS active-fire records into a more consistent burning-activity calendar. Users select an area of interest (AOI), explore historical fire patterns, inspect unusual activity, and review probabilistic critical burning windows.
 
-This repository is the working home for a NASA Space Apps Challenge 2026 project. It is designed to become the complete, reproducible record of the team's problem definition, research, data sources, product design, architecture, implementation, validation, and final submission.
+## Selected solution
 
-**Do not treat this scaffold as evidence that a feature already exists.** Items marked TBD or unverified must be resolved with evidence before implementation or submission.
+1. **Sensor harmonization:** LightGBM gradient-boosted regression with a Tweedie objective as the primary candidate for mapping MODIS observations to a VIIRS-equivalent FRP scale using overlap-period matches and available physical/contextual features.
+2. **Burning activity calendar:** daily AOI time series, seasonal baselines, anomaly scoring, and PatchTST as the selected temporal-model candidate for evaluating 14-day regional activity forecasts.
+3. **Independent optical verification:** optional NASA–IBM Prithvi-EO 2.0 burn-scar segmentation using compatible HLS optical imagery. It is not an active-fire generator and is not part of the thermal harmonization model.
+4. **Interactive web app:** AOI selection, hotspot map, 52-week-by-year calendar, historical trends, anomaly details, forecast uncertainty, provenance, and limitations.
+5. **Offline compute:** stage dependencies, model weights, and processed data separately; verify all required components in an internet-disabled Kaggle environment before GPU-heavy runs. Run the user-facing app outside Kaggle.
 
-## Start here
+## Core workflow
 
-1. Read [the project charter](docs/PROJECT_CHARTER.md).
-2. Complete [challenge and requirements discovery](docs/CHALLENGE_AND_REQUIREMENTS.md).
-3. Review the [architecture and decision process](docs/ARCHITECTURE.md).
-4. Establish the [repository and documentation map](docs/REPOSITORY_MAP.md).
-5. Use the [development guide](docs/DEVELOPMENT.md) once the stack is selected.
-6. Follow the [testing and validation plan](docs/TESTING.md).
-7. Track evidence, risks, and open decisions in [research and data](docs/RESEARCH_AND_DATA.md) and [risk register](docs/RISK_REGISTER.md).
-8. Work from the [GitHub Issues](https://github.com/Vtheonly/NasaSpaceApp2026/issues) board. Issues are the actionable backlog; docs describe the expected process and deliverables.
+AOI selection → FIRMS ingestion and five-pass validation → daily aggregation → overlap-period MODIS/VIIRS matching → harmonization and evaluation → calendar and anomaly baseline → probabilistic 14-day forecast → versioned artifacts → interactive web application. Optional HLS/Prithvi verification is a separate branch.
 
-## Current facts and unknowns
+## Scientific guardrails
 
-| Item | Status |
-|---|---|
-| Repository | `Vtheonly/NasaSpaceApp2026` |
-| Default branch | `main` |
-| Initial repository state | Empty; documentation scaffold being established |
-| Exact 2026 challenge selected | TBD |
-| Problem statement and judging criteria | TBD; must be sourced from official challenge materials |
-| Team members and responsibilities | TBD |
-| User/persona and target audience | TBD |
-| Solution concept and differentiator | TBD |
-| Languages, frameworks, hosting, and external services | TBD |
-| Data sources, licenses, and access constraints | TBD |
-| Prototype and demo status | Not yet verified |
-| Submission requirements and deadline | Must be confirmed from official event materials |
+- MODIS and VIIRS measurements are not directly interchangeable without evaluation; harmonized values are model estimates, not ground truth.
+- Missing observations are not the same as zero fire activity.
+- A burn scar is not equivalent to an active-fire detection or ignition timestamp.
+- Forecast regional burning activity probabilistically; do not claim to predict exact ignition coordinates or times.
+- Compare learned models with simple baselines and use chronological/rolling-origin evaluation.
+- Treat performance figures in planning notes as targets until measured reproducibly.
+- Label observed, harmonized, estimated, forecast, cached, and sample data distinctly.
 
-## Definition of done
+## Compute and artifact separation
 
-A deliverable is done only when its acceptance criteria are met, relevant automated and manual checks pass, documentation is updated, data sources and licenses are recorded, and a reviewer can reproduce or independently verify the result. A demo alone does not establish correctness.
+- **GitHub:** source code, docs, tests, small fixtures, configuration templates.
+- **Offline wheelhouse dataset:** compatible Linux wheels, versions, and hashes.
+- **Model/data datasets:** verified checkpoints and processed data, subject to their terms.
+- **Kaggle working output:** reports, checkpoints, metrics, and exported artifacts.
+- **Separate app host:** UI and query layer over exported artifacts.
 
-## Working principles
+The supplied design targets a Kaggle environment with 96 GB VRAM and 170 GB RAM, but the actual runtime must be inspected. Assume no network access during compute. Treat /kaggle/input as read-only and write generated outputs to /kaggle/working. Do not commit virtual environments, large datasets, model weights, or credentials to GitHub.
 
-- Solve the selected challenge rather than building technology without a validated user problem.
-- Prioritize an end-to-end, testable core workflow over a broad collection of unfinished features.
-- Prefer authoritative NASA, government, scientific, or original dataset sources; cite provenance and license/terms.
-- Make assumptions explicit and test them early.
-- Never commit credentials, private data, API tokens, or unlicensed assets.
-- Keep the setup, tests, architecture, limitations, and demo instructions synchronized with the implementation.
-- Create an issue for every meaningful deliverable, defect, research task, and unresolved decision.
-- Do not claim that tests, integrations, datasets, deployment, or event compliance have been verified unless there is evidence.
-
-## Documentation index
+## Project documents
 
 - [Project charter](docs/PROJECT_CHARTER.md)
-- [Challenge and requirements](docs/CHALLENGE_AND_REQUIREMENTS.md)
+- [Challenge requirements and traceability](docs/CHALLENGE_AND_REQUIREMENTS.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Repository map](docs/REPOSITORY_MAP.md)
-- [Development guide](docs/DEVELOPMENT.md)
-- [Testing and validation](docs/TESTING.md)
+- [Development and offline workflow](docs/DEVELOPMENT.md)
+- [Testing and five-pass validation](docs/TESTING.md)
 - [Research and data governance](docs/RESEARCH_AND_DATA.md)
 - [Risk register](docs/RISK_REGISTER.md)
-- [Contribution guide](CONTRIBUTING.md)
-- [Security policy](SECURITY.md)
-- [Decision records](docs/decisions/README.md)
-- [Issue backlog](https://github.com/Vtheonly/NasaSpaceApp2026/issues)
+- [Architecture decisions](docs/decisions/README.md)
+- [GitHub Issues](https://github.com/Vtheonly/NasaSpaceApp2026/issues)
 
-## Important
+## Status and definition of done
 
-This repository currently contains planning documents, not a completed product. First establish the exact challenge and success criteria; then revise the proposed structure to match the real solution instead of blindly implementing every placeholder.
+These documents define the selected architecture and delivery plan; they do not prove that models have trained or that the application is implemented. A component is complete only when its acceptance criteria, tests, data provenance, and reproducible evidence are recorded. Final delivery requires a clean AOI-to-calendar demo, validated harmonization and forecasting, a passing offline quarantine test, visible uncertainty/limitations, and a verified official submission checklist.
