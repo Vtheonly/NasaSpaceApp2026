@@ -1,93 +1,54 @@
-# Challenge and Requirements
+# Challenge Requirements and Traceability
 
-## Status
+## Selected challenge
 
-The actual challenge selection and official challenge text are not yet recorded. This document is a working template; it must be completed using official NASA Space Apps 2026 materials and team decisions.
+**Harmonization of MODIS and VIIRS Hot Spots** — NASA Space Apps Challenge 2026, Earth Science / Software.
 
-## 1. Official challenge record
+The challenge calls for a web application that harmonizes active-fire hotspot records into a burning activity calendar, enabling early-warning use and exploration of historical patterns, unusual conditions, and critical periods within a user-selected area of interest (AOI).
 
-- Challenge title: TBD
-- Challenge URL: TBD
-- Official prompt captured on: TBD
-- Judging criteria / evaluation rubric: TBD
-- Relevant event rules and submission requirements: TBD
-- Submission deadline and time zone: TBD
-- Required deliverables: TBD
-- Source links and archived copies: TBD
+## Requirements matrix
 
-Quote or summarize only what the source supports. Record retrieval dates for time-sensitive event requirements.
+| ID | Requirement | Planned implementation | Verification evidence |
+|---|---|---|---|
+| R-01 | Select an AOI | Map drawing or validated bounding box/polygon | Geometry and UI tests |
+| R-02 | Explore historical active-fire observations | FIRMS ingestion and sensor-aware map | Source/date labels and sample comparison |
+| R-03 | Harmonize MODIS and VIIRS | Matched overlap-period records; Tweedie gradient-boosted model | Held-out metrics against simple baselines |
+| R-04 | Build a continuous historical activity record | Daily AOI aggregation and harmonized series | Coverage, missingness, and aggregation tests |
+| R-05 | Show a burning activity calendar | 52-week-by-year view and seasonal summaries | Calendar calculation tests and demo evidence |
+| R-06 | Explore historical patterns | Trends, filtering, sensor-era comparison | End-to-end UI test |
+| R-07 | Identify unusual conditions | Seasonal baseline and documented anomaly score | Known/synthetic case tests and false-positive review |
+| R-08 | Examine critical periods | Probabilistic 14-day regional activity forecast | Rolling-origin backtest and uncertainty metrics |
+| R-09 | Avoid false ignition claims | Regional activity wording and explicit scientific limits | UI/copy review |
+| R-10 | Expose provenance and uncertainty | Source, date, coverage, model version, observed/estimated/forecast labels | Data-contract and UI tests |
+| R-11 | Optional burn-scar verification | HLS optical imagery plus compatible Prithvi checkpoint | Band/input validation and inference smoke test |
+| R-12 | Work offline in Kaggle | Staged wheels/checkpoints and air-gapped quarantine notebook | Offline install/import/forward-pass report |
+| R-13 | Deliver a functional web application | Separate app host using exported artifacts | Clean setup and demo run |
+| R-14 | Reproduce outputs | Versioned configs, source hashes, split manifests, model metrics | Re-run and artifact-integrity checks |
+| R-15 | Meet event submission rules | Official final checklist | Verified submission evidence |
 
-## 2. Problem framing
+## Scientific acceptance rules
 
-Complete after reading the official prompt:
+- Compare harmonization against identity/no-correction and simple calibration baselines.
+- Document spatial matching, temporal tolerance, duplicate handling, FRP aggregation, and quality filtering.
+- Use chronological splits and prevent matched events or overlapping windows from leaking across partitions.
+- Report bias and error across FRP ranges, regions, seasons, and sensor geometry where sample size supports it.
+- A regression model cannot recover fires never detected by MODIS unless that detection limitation is explicitly modeled and validated.
+- Distinguish missing coverage from zero observed detections.
+- Compare PatchTST with seasonal-naive and persistence forecasts using rolling-origin backtests.
+- Report quantile coverage/calibration; label uncalibrated intervals as experimental.
+- Prithvi burn-scar output is independent optical evidence, not an active-fire detection or proof of exact ignition time.
 
-- Who experiences the problem?
-- What decision, task, or understanding is difficult today?
-- What evidence demonstrates that the problem matters?
-- What is the current alternative or baseline?
-- What outcome should improve?
-- What is explicitly outside the challenge's scope?
-- What would make the solution meaningfully different from existing approaches?
+## Minimum viable demo
 
-Avoid solution-first reasoning. A framework or model is not itself a problem statement.
+1. Select a known AOI.
+2. Show source observations with sensor, date, quality/confidence, and FRP context.
+3. Compare raw and harmonized daily activity with the sensor transition marked.
+4. Inspect the burning calendar and a historical season.
+5. Select an anomaly and explain its seasonal baseline.
+6. Show the probabilistic 14-day regional activity forecast and uncertainty.
+7. Show optional optical verification only if compatible imagery and weights are available; otherwise explain why it is unavailable.
+8. Present data provenance, validation evidence, and limitations.
 
-## 3. User and use cases
+## Official event checks
 
-For each primary user/persona, document context, goals, constraints, digital access, relevant accessibility needs, and what success looks like. Validate personas with evidence; label hypothetical personas as assumptions.
-
-Use-case template:
-
-| Field | Description |
-|---|---|
-| ID | UC-01, UC-02, ... |
-| Actor | User or system |
-| Trigger | What starts the workflow |
-| Preconditions | Required data and system state |
-| Main flow | Observable steps from start to result |
-| Alternate/error flows | Missing, invalid, stale, or unavailable inputs |
-| Output | What the user receives |
-| Acceptance test | How a reviewer verifies success |
-
-## 4. Requirements catalogue
-
-Give each requirement a stable ID.
-
-- **FR-xxx:** functional requirements.
-- **NFR-xxx:** quality requirements such as performance, accessibility, reliability, and usability.
-- **DATA-xxx:** data acquisition, transformation, provenance, and quality.
-- **SEC-xxx:** security and privacy.
-- **SUB-xxx:** event and submission requirements.
-- **DOC-xxx:** documentation and reproducibility.
-
-Each requirement must include: statement, rationale/source, priority, owner, dependencies, acceptance criteria, verification method, and status.
-
-### Priority definitions
-
-- **P0 — Essential:** solution cannot satisfy the challenge or be evaluated without it.
-- **P1 — Important:** materially improves the core solution or rubric coverage.
-- **P2 — Optional:** only attempt after P0 requirements are working and tested.
-
-## 5. Traceability matrix
-
-Create and maintain a table with the following columns:
-
-| Requirement ID | Official criterion / evidence | User need | Design component | Implementation issue | Test ID | Demo evidence | Status |
-|---|---|---|---|---|---|---|---|
-| TBD | TBD | TBD | TBD | TBD | TBD | TBD | Not started |
-
-Every judging criterion should map to evidence. Every major feature should map to a user need or explicit criterion.
-
-## 6. Acceptance criteria
-
-Write acceptance criteria as observable outcomes, not implementation wishes. Prefer Given/When/Then or clear input/output conditions. Include at least one negative or failure-path case for important workflows.
-
-## 7. Scope control
-
-Before adding a feature, answer:
-1. Which user need or requirement does it satisfy?
-2. Which criterion or project objective does it support?
-3. How will it be verified?
-4. What is the smallest useful implementation?
-5. What cost, risk, or complexity does it add?
-
-If there is no defensible answer, defer the feature.
+The selected challenge is known from the project owner's supplied prompt. Before submission, independently verify current official event rules, deadline/time zone, team eligibility, required media and fields, judging criteria, and attribution requirements from official NASA Space Apps materials. Do not invent details absent from the supplied prompt.
