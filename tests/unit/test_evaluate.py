@@ -22,6 +22,20 @@ class TestMetrics:
         y = np.array([1.0, 10.0, 100.0])
         assert tweedie_deviance(y, y) == pytest.approx(0.0, abs=1e-12)
 
+    def test_closed_form_matches_reference_values(self):
+        # Constants cross-verified against scikit-learn's mean_tweedie_deviance
+        # (power=1.5) before the local implementation replaced the dependency.
+        assert tweedie_deviance([10.0], [5.0]) == pytest.approx(1.5345944486504415, rel=1e-9)
+        assert tweedie_deviance([10.0], [15.0]) == pytest.approx(0.5216676933690749, rel=1e-9)
+        # y=0: d = 2 * mu^(2-p)/(2-p) = 4*sqrt(mu) for p=1.5.
+        assert tweedie_deviance([0.0], [4.0]) == pytest.approx(8.0)
+
+    def test_power_must_be_in_open_interval(self):
+        with pytest.raises(ValueError, match="power"):
+            tweedie_deviance([1.0], [1.0], power=1.0)
+        with pytest.raises(ValueError, match="power"):
+            tweedie_deviance([1.0], [1.0], power=2.0)
+
     def test_deviance_asymmetry_favors_conservative_frp(self):
         y = np.array([10.0])
         under = tweedie_deviance(y, [5.0])   # 50% under
