@@ -1,94 +1,65 @@
 # Project Charter
 
-## 1. Purpose
+## Identity
 
-Define the project mandate and the evidence required to turn the NASA Space Apps Challenge 2026 participation into a coherent, demonstrable, reproducible solution.
+- Challenge: Harmonization of MODIS and VIIRS Hot Spots
+- Event: NASA Space Apps Challenge 2026
+- Product: interactive web application for cross-sensor active-fire harmonization, historical burning calendar, anomaly exploration, and probabilistic regional critical-period forecasts.
 
-## 2. Project identity
+## Problem
 
-- **Project name:** TBD
-- **Challenge title and official identifier:** TBD
-- **Official challenge URL:** TBD
-- **Team name:** TBD
-- **Team members and responsibilities:** TBD
-- **Project lead / decision owner:** TBD
-- **Repository:** https://github.com/Vtheonly/NasaSpaceApp2026
-- **Target users:** TBD
-- **Primary user problem:** TBD
-- **Proposed solution:** TBD
-- **Primary differentiator:** TBD
+MODIS and VIIRS differ in pixel footprint, scan geometry, detection sensitivity, overpass timing, and radiometric behavior. Raw counts and FRP are not directly interchangeable. The app should help users explore historical burning in a selected area of interest (AOI), understand normal seasonal patterns, and identify unusual activity relative to a defensible baseline.
 
-Do not fill these fields using guesses. Record a source or a team decision.
+## Intended users
 
-## 3. Objectives
+Fire and land managers, emergency-response planners, Earth-science researchers/educators, and evaluators. These are intended personas; user research remains a task, not a completed claim.
 
-After the challenge is selected, define measurable objectives. Candidate objective categories:
+## Selected solution
 
-1. Demonstrate a meaningful solution to the challenge's stated problem.
-2. Build a reliable end-to-end critical workflow.
-3. Use data or scientific information with traceable provenance.
-4. Validate the core claims with tests, sample cases, or user evaluation.
-5. Provide a reproducible setup and a demo that can be evaluated without undocumented steps.
-6. Communicate impact, limitations, and future work honestly.
+1. **Harmonization:** LightGBM gradient-boosted regression with Tweedie objective as the primary candidate, trained on matched MODIS/VIIRS overlap-period records.
+2. **Calendar and anomalies:** daily AOI aggregates, seasonal baselines, anomaly scoring, and PatchTST as the temporal-model candidate for probabilistic 14-day regional activity forecasts.
+3. **Optical audit:** optional Prithvi-EO 2.0 burn-scar verification using compatible HLS imagery; separate from thermal active-fire harmonization.
+4. **Web app:** AOI selection, hotspot map, 52-week-by-year calendar, historical trends, anomaly detail, uncertainty-aware forecast, source provenance, and limitations.
+5. **Offline compute:** stage wheels, model weights, and data separately; run internet-disabled quarantine checks before training; serve the UI outside Kaggle.
 
-Each objective needs a measurable success metric and a verification method.
+## Scope
 
-## 4. Scope
+### P0
+- FIRMS source inventory, data validation, AOI filtering, and daily aggregation.
+- Matched overlap-period calibration data with explicit spatial/temporal rules.
+- Baselines and evaluated Tweedie GBDT harmonization.
+- Seasonal calendar, anomaly baseline, and forecast evaluation; add PatchTST only with leakage-safe evidence.
+- End-to-end UI and versioned artifact contracts.
+- Five-pass validation, offline quarantine, reproducible demo, documentation, and official submission review.
 
-### In scope (provisional)
+### P1
+- Optional Prithvi/HLS audit; richer uncertainty display and exportable reports; performance optimization based on measurements.
 
-- Official challenge and judging-criteria analysis.
-- User/problem discovery and requirements.
-- Dataset/API evaluation, provenance, and licensing.
-- Architecture and interface design.
-- Implementation of a minimal end-to-end solution.
-- Testing, accessibility, reliability, and security checks appropriate to the stack.
-- Demo preparation, documentation, and submission assets.
+### P2
+- Global high-resolution processing, complex distributed infrastructure, continuous production ingestion, and unrelated features that do not improve the core demo.
 
-### Out of scope until explicitly approved
+## Success criteria
 
-- Features not tied to a requirement or judging criterion.
-- Claims of scientific, operational, or social impact without evidence.
-- Production-grade guarantees when only a hackathon prototype has been tested.
-- Paid services or infrastructure without a clear owner and budget.
-- Unnecessary collection of personal or sensitive data.
-
-## 5. Constraints and assumptions
-
-| Constraint or assumption | Status | Validation action |
+| ID | Outcome | Evidence |
 |---|---|---|
-| Official event rules and deadline | Unverified | Read official 2026 event materials |
-| Exact selected challenge | Unknown | Team decision recorded in issue and this charter |
-| Team availability and skills | Unknown | Record ownership and availability |
-| Internet/API availability during demo | Unknown | Test and prepare offline/fallback behavior if needed |
-| Compute and hosting budget | Unknown | Set budget before selecting dependencies |
-| Dataset terms and redistribution rights | Unknown | Review each source's license/terms |
-| Target devices and accessibility needs | Unknown | Define target environment and test plan |
+| SC-01 | AOI observation exploration works | UI smoke test and source/date labels |
+| SC-02 | Daily aggregation is deterministic | Unit tests and audit report |
+| SC-03 | Harmonization beats or explains comparison to baselines | Held-out metrics and split manifest |
+| SC-04 | Calendar exposes historical seasonality | Calculation tests and demo |
+| SC-05 | Anomaly scores are interpretable | Threshold docs and test cases |
+| SC-06 | Forecast is evaluated probabilistically | Rolling-origin report and uncertainty metrics |
+| SC-07 | Offline dependencies and local model loading work | Quarantine notebook report |
+| SC-08 | Clean setup reproduces core demo | Rehearsal checklist |
+| SC-09 | Optical audit is kept distinct from active-fire observations | Contract tests and UI labels |
 
-## 6. Stakeholders
+## Scientific boundaries
 
-Identify team members, intended users, evaluators, data providers, and any domain experts. For each stakeholder, document what they need, how feedback will be gathered, and who owns follow-up.
+Do not predict exact ignition locations/times. Do not treat burn scars as active-fire detections. Do not claim a model recovers fires that were never observed unless explicitly modeled and validated. Distinguish missing coverage from zero detections. Planning performance estimates are not results until measured.
 
-## 7. Success criteria
+## Constraints
 
-The team must approve concrete thresholds after discovery. At minimum:
+The supplied design targets an offline Kaggle accelerator with 96 GB VRAM and 170 GB RAM; inspect actual runtime capabilities. Treat `/kaggle/input/` as read-only and write outputs under `/kaggle/working/`. Keep large data, weights, wheelhouses, environments, and secrets out of GitHub. Verify all source/model terms and official event requirements.
 
-- Every required challenge criterion maps to a demonstrable feature or explicit explanation.
-- The critical user journey works from a clean setup.
-- Core calculations and transformations have tests and documented assumptions.
-- Data sources and usage terms are documented.
-- Known limitations, failure modes, and unsupported scenarios are disclosed.
-- The demo and submission artifacts are accessible and reproducible.
-- No secrets or prohibited data are committed.
+## Delivery order
 
-## 8. Governance
-
-- Product scope and challenge interpretation: project lead/team decision.
-- Architecture and dependency choices: documented decision record.
-- Every deliverable: owned issue with acceptance criteria.
-- Scope changes: update requirements, architecture, tests, and demo plan.
-- Disagreements: record options, evidence, decision, and consequences in a decision record.
-
-## 9. First milestone
-
-**Milestone 0 — Challenge discovery:** confirm the official challenge, problem statement, rules, judging criteria, team roles, target user, constraints, and initial success metrics. Do not finalize product architecture before this milestone.
+Freeze requirements and data contracts → validate sample data → implement aggregation → evaluate harmonization baselines/model → implement calendar/anomaly/forecast → connect UI → run offline quarantine and end-to-end tests → verify submission checklist.
