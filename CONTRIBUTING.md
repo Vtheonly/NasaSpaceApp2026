@@ -1,38 +1,45 @@
 # Contributing
 
+## Project context
+
+This repository builds an interactive application that harmonizes MODIS and VIIRS active-fire records into a historical burning calendar, anomaly exploration, and probabilistic regional critical-period forecasts. Read the README, challenge requirements, architecture, data governance, and testing documents before changing core behavior.
+
 ## Workflow
 
-1. Read the README and relevant documents before changing implementation.
-2. Work from an issue with a clear problem statement, owner, scope, and acceptance criteria.
-3. Keep each change focused and avoid unrelated refactors.
-4. Add tests for changed behavior and relevant failure cases.
-5. Run the documented checks and report their actual results.
-6. Update documentation, diagrams, source attribution, and examples when affected.
-7. Review the final diff for secrets, generated artifacts, licenses, and unintended scope.
-8. Link the issue and provide reproducible verification evidence.
+1. Choose an actionable issue and check dependencies.
+2. Keep changes focused on one deliverable or closely related fix.
+3. Preserve separation between source validation, harmonization, temporal modeling, optional optical verification, artifacts, and UI.
+4. Add tests with implementation changes.
+5. Update schemas, provenance, docs, repository map, and ADRs when behavior changes.
+6. Run relevant checks and record exact commands and results.
+7. Reference the issue in the commit/PR description.
 
-## Definition of done
+## Scientific rules
 
-- Acceptance criteria are met.
-- Automated checks relevant to the change pass, or failures are clearly documented.
-- Important edge cases are covered.
-- Documentation matches the behavior.
-- External data and assets have provenance and appropriate terms.
-- No secrets or restricted data are introduced.
-- Remaining limitations are stated.
+- Do not assume MODIS and VIIRS measurements are directly interchangeable.
+- Label observed, harmonized, estimated, forecast, cached, and sample values distinctly.
+- Never use future information in training features or evaluation.
+- Do not treat missing coverage as zero detections without an explicit policy.
+- Compare learned models against simple baselines.
+- Do not present a regional activity forecast as an exact ignition prediction.
+- Keep Prithvi optical burn-scar inference separate from active-fire thermal harmonization.
+- Treat performance estimates as targets until measured reproducibly.
 
-## Issue quality
+## Offline rules
 
-Issues should describe the problem or outcome, why it matters, concrete deliverables, acceptance criteria, dependencies, and verification. Split large work into deliverable-sized issues with explicit dependencies. Avoid vague tasks such as “finish everything.”
+- No online package/model downloads in the offline compute path.
+- Do not commit virtual environments, wheelhouses, model checkpoints, raw/processed datasets, notebook caches, or secrets.
+- Verify local artifact hashes and keep Kaggle input datasets read-only.
+- Do not depend on Docker or tunnels inside the offline Kaggle notebook.
 
-## Coding conventions
+## Change checklist
 
-The language and formatter are not selected yet. Once chosen, pin the relevant toolchain and document naming, formatting, linting, type checking, error handling, and test conventions here. Prefer clear names, small cohesive functions, explicit contracts, and tested domain logic.
+- [ ] Issue and acceptance criteria are clear.
+- [ ] Tests cover expected and failure behavior.
+- [ ] Units, schemas, provenance, and missingness semantics are preserved.
+- [ ] No future-data leakage or fabricated output is introduced.
+- [ ] No secrets or large generated artifacts are committed.
+- [ ] Documentation matches the resulting code.
+- [ ] Exact test commands/results are recorded.
 
-## Documentation conventions
-
-- Use Markdown headings in hierarchical order.
-- Link related files and issues.
-- Label unknowns and assumptions rather than presenting them as facts.
-- Include runnable commands only after verifying them against the chosen stack.
-- Keep the repository map and architecture diagrams synchronized with actual files.
+Every issue should define an outcome, tasks, acceptance criteria, dependencies, and evidence needed to close it.
