@@ -51,6 +51,7 @@ The supplied design targets a Kaggle environment with 96 GB VRAM and 170 GB RAM,
 - [Scientific demo guide](docs/DEMO_GUIDE.md)
 - [Dependency and security audit](docs/DEPENDENCY_AND_SECURITY_AUDIT.md)
 - [Post-hackathon backlog](docs/POST_HACKATHON_BACKLOG.md)
+- [Official submission checklist](docs/SUBMISSION_CHECKLIST.md)
 - [GitHub Issues](https://github.com/Vtheonly/NasaSpaceApp2026/issues)
 
 ## Status and definition of done
@@ -76,7 +77,8 @@ deterministic synthetic fixtures - see docs/MODEL_CONTRACTS.md for contracts,
 assumptions, and limitations.
 
 **Still planned:** the Streamlit app, the optional Prithvi optical audit, and
-validation on real FIRMS archives.
+validation on a multi-year real FIRMS archive (real NRT schema compatibility
+is already verified - see docs/DEPENDENCY_AND_SECURITY_AUDIT.md).
 
 A component is complete only when its acceptance criteria, tests, data
 provenance, and reproducible evidence are recorded. Final delivery requires a
